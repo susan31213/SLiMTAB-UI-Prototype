@@ -1,13 +1,34 @@
-import NAME from '../common/common';
-import { FingerTab }  from '../common/FingerTab';
+import { FingerBoard } from '../common/FingerBoard';
 
-export function init() {
-  document.write(`<h1>The name is ${NAME}</h1>`);
-  document.write('<canvas id="myCanvas" width="200" height="100"></canvas>');
-  
-  document.addEventListener('click', function() {
-    const ft = new FingerTab(700, 200, 5);
-    ft.draw();
+
+function init() {
+  const fb = new FingerBoard();
+  let container: HTMLElement | null = document.getElementById('container');
+  if(container != null) {
+    container.appendChild(fb.domElement);
+    container.appendChild(fb.pressPointElements);
+  }
+
+  // add button listener
+  let pressBtn = document.getElementById("pressBtn") as HTMLElement;
+  let unpressBtn = document.getElementById("unpressBtn") as HTMLElement;
+  let pickBtn = document.getElementById("pickBtn") as HTMLElement;
+
+  pressBtn.addEventListener("click", () => {
+    let stringID: number = + ((document.getElementById("stringID") as HTMLInputElement).value);
+    let note: string = (document.getElementById("note") as HTMLInputElement).value;
+    fb.press(stringID as number, note);
+  });
+
+  unpressBtn.addEventListener("click", () => {
+    let stringID: number = + ((document.getElementById("stringID") as HTMLInputElement).value);
+    let note: string = (document.getElementById("note") as HTMLInputElement).value;
+    fb.unPress(stringID as number, note);
+  });
+
+  pickBtn.addEventListener("click", () => {
+    let stringID: number = + ((document.getElementById("stringID") as HTMLInputElement).value);
+    fb.pick(stringID as number);
   });
 }
 

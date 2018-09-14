@@ -7,11 +7,24 @@
     <script>if (typeof module === 'object') {window.module = module; module = undefined;}</script>
     <script src="../renderer/static/js/jquery-2.2.4.js"></script>
     <script src="./dist/ui-bundle.js" type="text/javascript"></script>
+    <link rel="stylesheet" href="myStyle.css">
     <script>if (window.module) module = window.module;</script>
   </head>
   <body>
-    <h1>
-      boilerplate
+    <h1 id=title>
+      Gitar
     </h1>
+    <div id='container'></div><br>
+
+
+    <div id='debugger'>
+      <p>StringID: <input id="stringID" type="text" value="6"> </p>
+      <p>Note: <input id="note" type="text" value="F2"></p> <br>
+      <input id="pressBtn" type="button" value="Press"> 
+      <input id="unpressBtn" type="button" value="Unpress"> 
+      <input id="pickBtn" type="button" value="Pick"><br>
+    </div>
+
+
   </body>
 </html>

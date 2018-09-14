@@ -1,0 +1,50 @@
+#container {
+    position: relative;
+}
+
+#container canvas, #pressPoint {
+    position: absolute;
+}
+
+canvas {
+    border: 1px solid black;
+    box-sizing: border-box;
+    border-left-width: 10px;
+    /* display: block; */
+    margin: 0 auto;
+    position:relative;
+}
+
+#title {
+    text-align: center;
+}
+
+#pressPointContainer {
+    padding-top: 16px;
+    padding-left: 11px;
+    padding-bottom: 16px;
+}
+
+#pressPointContainer #pressPoint, #pressPointStart {
+    width: 28px;
+    height: 28px;
+    border-radius:50%;
+
+
+    margin:1px;
+    margin-left: 20.5px;
+    margin-right: 22px;
+    vertical-align:top;
+
+    position:relative;
+    display: inline-table;
+    /* border:1px solid blue; */
+}
+
+.press {
+    background-color: blue;
+}
+
+.unpress {
+    background-color: transparent;
+}
