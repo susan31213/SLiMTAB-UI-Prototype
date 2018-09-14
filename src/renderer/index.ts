@@ -1,13 +1,11 @@
 import { FingerBoard } from '../common/FingerBoard';
-
+var fb: FingerBoard;
 
 function init() {
-  const fb = new FingerBoard();
-  let container: HTMLElement | null = document.getElementById('container');
-  if(container != null) {
-    container.appendChild(fb.domElement);
-    container.appendChild(fb.pressPointElements);
-  }
+  fb = new FingerBoard();
+
+  window.addEventListener("resize", redrawCanvas, false);
+  redrawCanvas();
 
   // add button listener
   let pressBtn = document.getElementById("pressBtn") as HTMLElement;
@@ -30,9 +28,24 @@ function init() {
     let stringID: number = + ((document.getElementById("stringID") as HTMLInputElement).value);
     fb.pick(stringID as number);
   });
+
+  function redrawCanvas() {
+    fb.DrawCanvasAndPressPoints();
+    let container: HTMLElement | null = document.getElementById('container');
+    if(container != null) {
+      container.childNodes.forEach(element => {
+        element.remove();
+      });
+      container.appendChild(fb.domElement);
+      container.style.height = (fb.domElement.height+2) + "px";
+      container.style.width = (fb.domElement.width) + "px";
+      container.appendChild(fb.pressPointElements);
+    }
+  }
 }
 
+
+
 $(document).ready(() => {
-  console.log('page is loaded and ready');
   init();
 });

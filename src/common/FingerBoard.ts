@@ -30,7 +30,7 @@ class StringStatus {
     }
 }
 
-
+const stringInterval = 30;
 // interface FingerBoardCallbacks {
 //     onPressed: (e: any) => void;
 // }
@@ -46,7 +46,7 @@ class StringStatus {
 
 export class FingerBoard {
     private config: FingerBoardConfig;
-    private domElementCache: HTMLCanvasElement;
+    private domElementCache: HTMLCanvasElement = document.createElement("canvas");
     private pressPointElementCache: HTMLElement = document.createElement("div");
     private stringStutasCache: Array<StringStatus> = [];
 
@@ -68,52 +68,8 @@ export class FingerBoard {
             console.log(this.stringStutasCache[this.stringStutasCache.length-1].playing);
         });
 
-        
-
-        // Create Canvas
-        this.domElementCache = document.createElement("canvas");
-        this.domElementCache.width = 1410;
-        this.domElementCache.height = (this.config.numOfString+1) * 30;
-        let ctx = this.domElementCache.getContext('2d');
-        if(ctx != null)
-        {
-            // Draw string
-            ctx.lineWidth = 1;
-            for(var i = 1; i <= this.config.numOfString; i++)
-            {
-                ctx.beginPath();
-                ctx.moveTo(0, i*30);
-                ctx.lineTo(this.domElement.width, i*30);
-                ctx.stroke(); 
-            }
-
-            // Draw coda
-            let dx = this.domElement.width / this.config.numOfCoda;
-            for(var i = 1; i < this.config.numOfCoda; i++)
-            {
-                ctx.beginPath();
-                ctx.moveTo(dx*i, 0);
-                ctx.lineTo(dx*i, this.domElement.height);
-                ctx.stroke(); 
-            }
-        }
-
-        // Press point divs
-        this.pressPointElementCache.id = "pressPointContainer";
-        for(var i = 0; i < this.config.numOfString; i++) {
-            for(var j = 0; j < this.config.numOfCoda; j++) {
-                
-                let d: HTMLDivElement = document.createElement("div");
-                if(j == 0)
-                    d.id = "pressPointStart";
-                else
-                    d.id = "pressPoint";
-                d.className = "unpress";
-                this.pressPointElementCache.appendChild(d);
-
-            }
-            this.pressPointElementCache.appendChild(document.createElement("br"));
-        }
+        // Create Canvas & press points
+        this.DrawCanvasAndPressPoints();
     }
 
     // public on(ename: string, cbk: (e: any) => void) {
@@ -155,6 +111,63 @@ export class FingerBoard {
         return this.stringStutasCache;
     }
     
+    public DrawCanvasAndPressPoints() {
+        let ctx = this.domElementCache.getContext('2d');
+        if(ctx != null)
+            ctx.clearRect(0, 0, this.domElementCache.width, this.domElementCache.height);
+        this.domElementCache.width = window.innerWidth * 0.9;
+        this.domElementCache.height = (this.config.numOfString+1) * stringInterval;
+        
+        if(ctx != null)
+        {
+            // Draw string
+            ctx.lineWidth = 1;
+            for(var i = 1; i <= this.config.numOfString; i++)
+            {
+                ctx.beginPath();
+                ctx.moveTo(0, i*stringInterval);
+                ctx.lineTo(this.domElement.width, i*stringInterval);
+                ctx.stroke(); 
+            }
+
+            // Draw coda
+            let dx = this.domElement.width / this.config.numOfCoda;
+            for(var i = 1; i < this.config.numOfCoda; i++)
+            {
+                ctx.beginPath();
+                ctx.moveTo(dx*i, 0);
+                ctx.lineTo(dx*i, this.domElement.height);
+                ctx.stroke(); 
+            }
+        }
+
+        // Press point divs
+        if(this.pressPointElementCache != null) this.pressPointElementCache.remove();
+        this.pressPointElementCache = document.createElement("div");
+        this.pressPointElementCache.id = "pressPointContainer";
+        
+        this.pressPointElementCache.style.height = (this.domElementCache.height-stringInterval) + "px";
+        this.pressPointElementCache.style.paddingTop = (stringInterval/2+1) + "px";
+        this.pressPointElementCache.style.paddingBottom = (stringInterval/2+1) + "px";
+        
+        for(var i = 0; i < this.config.numOfString; i++) {
+            for(var j = 0; j < this.config.numOfCoda; j++) {
+                
+                let d: HTMLDivElement = document.createElement("div");
+                d.id = "pressPoint";
+                d.className = "unpress";
+                d.style.width = (this.domElementCache.width/this.config.numOfCoda*0.5) + "px";
+                d.style.marginLeft = (this.domElementCache.width/this.config.numOfCoda*0.25) + "px";
+                d.style.marginRight = (this.domElementCache.width/this.config.numOfCoda*0.25) + "px";
+                d.style.height = (stringInterval-2) + "px";
+
+                this.pressPointElementCache.appendChild(d);
+
+            }
+            this.pressPointElementCache.appendChild(document.createElement("br"));
+        }
+    }
+
     private note2num(note: string | null): number 
     {
         if(note != null)
@@ -197,8 +210,8 @@ export class FingerBoard {
                 for(var i = 1; i <= parent.config.numOfString; i++)
                 {
                     ctx.beginPath();
-                    ctx.moveTo(0, i*30);
-                    ctx.lineTo(parent.domElement.width, i*30);
+                    ctx.moveTo(0, i*stringInterval);
+                    ctx.lineTo(parent.domElement.width, i*stringInterval);
                     ctx.stroke(); 
                 }
     
@@ -228,8 +241,8 @@ export class FingerBoard {
                         if(ctx != null) {
                             ctx.beginPath();
                             ctx.lineWidth = 4;
-                            ctx.moveTo(0, (i+1)*30);
-                            ctx.lineTo(parent.domElement.width, (i+1)*30);
+                            ctx.moveTo(0, (i+1)*stringInterval);
+                            ctx.lineTo(parent.domElement.width, (i+1)*stringInterval);
                             ctx.strokeStyle = 'rgba(255, 0, 0, ' + (1-ss[i].elapsed / ss[i].duration) + ')';
                             ctx.stroke();
                         }

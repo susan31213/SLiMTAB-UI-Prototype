@@ -1,6 +1,9 @@
 # SLiMTAB UI Prototype
 
 ## 2018/09/14
+1. Redraw Canvas & Press Points when window resize
+
+## 2018/09/13
 1. Render pick & press
 2. need to use relative css style
 
