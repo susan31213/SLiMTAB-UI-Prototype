@@ -76,41 +76,6 @@ export class FingerBoard {
         
     // }
 
-    public press(stringId: number, note: string): void {        
-        let diff = this.note2num(note) - this.baseToneNumbers[stringId -1];
-        if(diff != 0) {
-            console.log("Press: " + stringId + ", " + note + "(" + ((stringId-1) * (this.config.numOfCoda+1) + diff) + ")");
-            this.pressPointElements.children.item((stringId-1) * (this.config.numOfCoda+1) + diff -1).className = "press";
-        }
-    }
-
-    public unPress(stringId: number, note: string): void {
-        let diff = this.note2num(note) - this.baseToneNumbers[stringId -1];
-        if(diff != 0) {
-            console.log("UnPress: " + stringId + ", " + note + "(" + ((stringId-1) * (this.config.numOfCoda+1) + diff) + ")");
-            this.pressPointElements.children.item((stringId-1) * (this.config.numOfCoda+1) + diff -1).className = "unpress";
-        }
-    }
-
-    public pick(stringId: number): void {
-        console.log("Pick: " + stringId);
-        this.stringStutasCache[stringId-1].playing = true;
-        this.stringStutasCache[stringId-1].start = -1;
-        this.playAnimation(this);
-    }
-
-    get domElement(): HTMLCanvasElement {
-        return this.domElementCache;
-    }
-
-    get pressPointElements(): HTMLElement {
-        return this.pressPointElementCache;
-    }
-
-    get stringStutas(): Array<StringStatus> {
-        return this.stringStutasCache;
-    }
-    
     public DrawCanvasAndPressPoints() {
         let ctx = this.domElementCache.getContext('2d');
         if(ctx != null)
@@ -166,6 +131,41 @@ export class FingerBoard {
             }
             this.pressPointElementCache.appendChild(document.createElement("br"));
         }
+    }
+
+    public press(stringId: number, note: string): void {        
+        let diff = this.note2num(note) - this.baseToneNumbers[stringId -1];
+        if(diff != 0) {
+            console.log("Press: " + stringId + ", " + note + "(" + ((stringId-1) * (this.config.numOfCoda+1) + diff) + ")");
+            this.pressPointElements.children.item((stringId-1) * (this.config.numOfCoda+1) + diff -1).className = "press";
+        }
+    }
+
+    public unPress(stringId: number, note: string): void {
+        let diff = this.note2num(note) - this.baseToneNumbers[stringId -1];
+        if(diff != 0) {
+            console.log("UnPress: " + stringId + ", " + note + "(" + ((stringId-1) * (this.config.numOfCoda+1) + diff) + ")");
+            this.pressPointElements.children.item((stringId-1) * (this.config.numOfCoda+1) + diff -1).className = "unpress";
+        }
+    }
+
+    public pick(stringId: number): void {
+        console.log("Pick: " + stringId);
+        this.stringStutasCache[stringId-1].playing = true;
+        this.stringStutasCache[stringId-1].start = -1;
+        this.playAnimation(this);
+    }
+
+    get domElement(): HTMLCanvasElement {
+        return this.domElementCache;
+    }
+
+    get pressPointElements(): HTMLElement {
+        return this.pressPointElementCache;
+    }
+
+    get stringStutas(): Array<StringStatus> {
+        return this.stringStutasCache;
     }
 
     private note2num(note: string | null): number 
