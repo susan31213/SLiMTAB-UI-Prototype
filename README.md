@@ -1,5 +1,11 @@
 # SLiMTAB UI Prototype
 
+- [ ] MIDI Player
+- [ ] Data trasfer
+
+## 2018/09/15
+1. CSS: center the container
+
 ## 2018/09/14
 1. Redraw Canvas & Press Points when window resize
 
