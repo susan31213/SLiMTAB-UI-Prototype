@@ -1,4 +1,4 @@
-import { FingerBoard } from '../common/FingerBoard';
+import { FingerBoard, NoteInfo } from '../common/FingerBoard';
 var fb: FingerBoard;
 
 function init() {
@@ -29,8 +29,28 @@ function init() {
     fb.pick(stringID as number);
   });
 
+  // Callbacks (Debuggggggggggg)
+  let sf1 = document.getElementById("sf1") as HTMLElement;
+  let usf1 = document.getElementById("usf1") as HTMLElement;
+  let sf2 = document.getElementById("sf2") as HTMLElement;
+  let usf2 = document.getElementById("usf2") as HTMLElement;
+
+  sf1.addEventListener("click", () => {
+    fb.subscribe("press", f1);
+  })
+  usf1.addEventListener("click", () => {
+    fb.unSubscribe("press", f1);
+  })
+  sf2.addEventListener("click", () => {
+    fb.subscribe("press", f2);
+  })
+  usf2.addEventListener("click", () => {
+    fb.unSubscribe("press", f2);
+  })
+  
+
   function redrawCanvas() {
-    fb.DrawCanvasAndPressPoints();
+    fb.drawCanvasAndPressPoints();
     let container: HTMLElement | null = document.getElementById('container');
     if(container != null) {
       container.childNodes.forEach(element => {
@@ -42,6 +62,18 @@ function init() {
       container.appendChild(fb.pressPointElements);
     }
   }
+
+  function f1(note: NoteInfo) {
+    let htmlDiv = note.htmlElement;
+    console.log("f1: " + note.divIndex + ", " + note.string + " " + note.note + " ");
+    if(htmlDiv != undefined)
+      htmlDiv.className = (htmlDiv.className == "press")? "unPress":"press";
+  }
+
+  function f2(note: NoteInfo) {
+    console.log("f2: " + note.divIndex + ", " + note.string + " " + note.note);
+  }
+
 }
 
 

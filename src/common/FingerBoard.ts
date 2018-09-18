@@ -14,7 +14,7 @@ class Dictionary {
         }
     }
 }
-const noteNumberDic = new Dictionary(["C","D","E","F","G","A","B"], [0,2,4,5,7,9,11]);
+const noteNumberDic = new Dictionary(["C", "D", "E","F","G","A","B"], [0, 2,4,5,7,9,11]);
 
 class StringStatus {
     playing: boolean;
@@ -30,19 +30,25 @@ class StringStatus {
     }
 }
 
-const stringInterval = 30;
-// interface FingerBoardCallbacks {
-//     onPressed: (e: any) => void;
-// }
+export class NoteInfo {
+    htmlElement: HTMLElement | undefined;
+    divIndex: number;
+    string: number;
+    note: string;
+    constructor(str: string) {
+        let splited = str.split(",");
+        this.divIndex = parseInt(splited[0]);
+        let ele = document.getElementById("pressPointContainer");
+        if(ele != null)
+            this.htmlElement = ele.children.item(this.divIndex) as HTMLElement;
+        else
+            this.htmlElement = undefined;
+        this.string = parseInt(splited[1]);
+        this.note = splited[2];
+    }
+}
 
-// enum StringID {
-//     One = 1,
-//     Two = 2,
-//     Three = 3,
-//     Four = 4,
-//     Five = 5,
-//     Six = 6
-// }
+const stringInterval = 30;
 
 export class FingerBoard {
     private config: FingerBoardConfig;
@@ -50,8 +56,11 @@ export class FingerBoard {
     private pressPointElementCache: HTMLElement = document.createElement("div");
     private stringStutasCache: Array<StringStatus> = [];
 
+    private pressFunctions: Array<Function> = [];
+    private unPressFunctions: Array<Function> = [];
+    private pickFunctions: Array<Function> = [];
+
     private baseToneNumbers: Array<number> = [];
-    //private callbacks: FingerBoardCallbacks;
 
     constructor(config?: FingerBoardConfig) {
         if(config == undefined) {
@@ -65,18 +74,40 @@ export class FingerBoard {
 
             // init string stutas...
             this.stringStutasCache.push(new StringStatus());
-            console.log(this.stringStutasCache[this.stringStutasCache.length-1].playing);
         });
 
         // Create Canvas & press points
-        this.DrawCanvasAndPressPoints();
+        this.drawCanvasAndPressPoints();
     }
 
-    // public on(ename: string, cbk: (e: any) => void) {
-        
-    // }
+    public subscribe(event: string, func: (note: NoteInfo) => void) {
+        if(event == "press")
+            this.pressFunctions.push(func);
+        else if(event == "unPress")
+            this.unPressFunctions.push(func);
+        else if(event == "pick")
+            this.pickFunctions.push(func);
+    }
 
-    public DrawCanvasAndPressPoints() {
+    public unSubscribe(event: string, func: (note: NoteInfo) => void) {
+        if(event == "press") {
+            this.pressFunctions.forEach( (element, idx) => {
+                if(element == func) this.pressFunctions.splice(idx, 1);
+            });
+        }
+        else if(event == "unPress") {
+            this.unPressFunctions.forEach( (element, idx) => {
+                if(element == func) this.unPressFunctions.splice(idx, 1);
+            });
+        }
+        else if(event == "pick") {
+            this.pickFunctions.forEach( (element, idx) => {
+                if(element == func) this.pickFunctions.splice(idx, 1);
+            });
+        }
+    }
+
+    public drawCanvasAndPressPoints() {
         let ctx = this.domElementCache.getContext('2d');
         if(ctx != null)
             ctx.clearRect(0, 0, this.domElementCache.width, this.domElementCache.height);
@@ -115,6 +146,16 @@ export class FingerBoard {
         this.pressPointElementCache.style.paddingTop = (stringInterval/2+1) + "px";
         this.pressPointElementCache.style.paddingBottom = (stringInterval/2+1) + "px";
         
+        const pressFunc = (ev: MouseEvent) => {
+            let s = (ev.target as HTMLElement).dataset;
+            if(s.noteInfo != undefined) {
+                let n = new NoteInfo(s.noteInfo);
+                this.pressFunctions.forEach(element => {
+                    element(n);
+                });
+            }
+        };
+
         for(var i = 0; i < this.config.numOfString; i++) {
             for(var j = 0; j < this.config.numOfCoda; j++) {
                 
@@ -125,7 +166,8 @@ export class FingerBoard {
                 d.style.marginLeft = (this.domElementCache.width/this.config.numOfCoda*0.25) + "px";
                 d.style.marginRight = (this.domElementCache.width/this.config.numOfCoda*0.25) + "px";
                 d.style.height = (stringInterval-2) + "px";
-
+                d.dataset.noteInfo = `${i*(this.config.numOfCoda+1)+j},${i+1},` + this.num2note(i+1, this.baseToneNumbers[i]+j+1);
+                d.onclick = pressFunc;
                 this.pressPointElementCache.appendChild(d);
 
             }
@@ -174,21 +216,59 @@ export class FingerBoard {
         {
             let a, b: number;
             a = noteNumberDic[note.charAt(0)];
-            b = + note.charAt(1);
+            b = + note.charAt(note.length-1);
             let ret = a+(b-1)*12;
+
             if(note.length == 3) {
-                if(note.charAt(2) == "#")   ret++;
-                else if(note.charAt(2) == "b")    ret--;
+                if(note.charAt(1) == "#")   ret++;
+                else if(note.charAt(1) == "b")    ret--;
             }
 
             if(a != undefined && b != undefined)
-                return ret;
+                return (note.length == 2)? ret : ((note.charAt(1) == "#")? ret++ : ret--);
             else
                 return -1;
         }
         else
             return -1;
-    }  
+    } 
+    
+    private num2note(stringId: number, noteNum:number): string {
+        if(stringId == undefined || noteNum == undefined)
+            return "";
+
+        let nNum = Math.floor(noteNum / 12)+1;
+        let nName = noteNum % 12;
+        switch (nName) {
+            case 0:
+                return ("C" + nNum);
+            case 1:
+                return ("C#" + nNum);
+            case 2:
+                return ("D" + nNum);
+            case 3:
+                return ("D#" + nNum);
+            case 4:
+                return ("E" + nNum);
+            case 5:
+                return ("F" + nNum);
+            case 6:
+                return ("F#" + nNum);
+            case 7:
+                return ("G" + nNum);
+            case 8:
+                return ("G#" + nNum);
+            case 9:
+                return ("A" + nNum);
+            case 10:
+                return ("A#" + nNum);
+            case 11:
+                return ("B" + nNum);
+            default:
+                return "";
+        }
+        
+    } 
 
     private playAnimation(parent: FingerBoard) {
 
