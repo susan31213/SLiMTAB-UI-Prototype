@@ -14,7 +14,7 @@ class Dictionary {
         }
     }
 }
-const noteNumberDic = new Dictionary(["C", "D", "E","F","G","A","B"], [0, 2,4,5,7,9,11]);
+const noteNumberDic = new Dictionary(["C", "D", "E", "F", "G", "A", "B"], [0, 2, 4, 5, 7, 9, 11]);
 
 class StringStatus {
     playing: boolean;
@@ -80,7 +80,7 @@ export class FingerBoard {
         this.drawCanvasAndPressPoints();
     }
 
-    public subscribe(event: string, func: (note: NoteInfo) => void) {
+    public on(event: string, func: (note: NoteInfo) => void) {
         if(event == "press")
             this.pressFunctions.push(func);
         else if(event == "unPress")
