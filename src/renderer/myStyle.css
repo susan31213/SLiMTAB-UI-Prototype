@@ -1,3 +1,51 @@
+/* for svg */
+.cls-1,.cls-4,.cls-5,.cls-6 {
+    fill:none;
+    stroke-miterlimit:10;
+}
+.cls-1 {
+    stroke:#e99415;
+    stroke-width:0.5px;
+}
+.cls-2 {
+    fill:#c2c1c8;
+}
+.cls-3 {
+    fill:#89919c;
+}
+.cls-4 {
+    stroke:#c2c1c8;
+    stroke-width:2px;
+}
+.cls-5,.cls-6 {
+    stroke:#dfdde6;
+}
+.cls-6 {
+    stroke-width:0.75px;
+} 
+.cls-7 {
+    fill:#52565c;
+}
+.cls-8 {
+    fill:#e99415; 
+} 
+.finger-point-pressed {
+    fill:#e99415;
+    stroke: #dfdde6;
+    stroke-width: 0.75px;
+}
+.finger-point-unpressed {
+    fill:#e9941500;
+    stroke: #dfdde600;
+    stroke-width: 0.75px;
+}
+.cls-9 {
+    fill:#dfdde600;
+}
+.cls-10 {
+    fill:#252525;
+}
+/* end for svg */
 #container {
     position: relative;
     padding: 0;

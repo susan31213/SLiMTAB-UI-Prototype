@@ -1,0 +1,304 @@
+﻿<svg id="fingertab" data-name="圖層 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1072 130">
+    <defs>
+        <style>
+            .cls-1,.cls-4,.str-u {
+                fill:none;
+                stroke-miterlimit:10;
+            }
+            .cls-1 {
+                stroke:#e99415;
+                stroke-width:0.5px;
+            }
+            .cls-2 {
+                fill:#c2c1c8;
+            }
+            .cls-3 {
+                fill:#89919c;
+            }
+            .cls-4 {
+                stroke:#c2c1c8;
+                stroke-width:2px;
+            }
+            .str-p {
+                stroke:#e99415;
+            }
+            .str-u {
+                stroke:#dfdde6;
+                stroke-width:0.75px;
+            }
+            .cls-7 {
+                fill:#52565c;
+            }
+            .strp-p {
+                fill:#e99415; 
+            }
+            .strp-u {
+                fill:rgba(233, 148, 21, 0);
+            } 
+            .fb-p {
+                fill:#e99415;
+                stroke: #dfdde6;
+                stroke-width: 0.75px;
+            }
+            .fb-u {
+                fill:rgba(233, 148, 21, 0);
+                stroke: rgba(223, 221, 230, 0);
+                stroke-width: 0.75px;
+            }
+            .cls-9 {
+                fill:#dfdde600;
+            }
+            .cls-10 {
+                fill:#252525;
+            }</style>
+    </defs>
+    <title>工作區域 1</title>
+    <line class="cls-1" x1="208.45" y1="35.14" x2="1061.38" y2="35.14" />
+    <rect class="cls-2" x="202.9" y="26.09" width="19.16" height="77.83" />
+    <circle class="cls-3" cx="962.66" cy="65" r="64.81" />
+    <path class="cls-3" d="M218.64,26.09H868.89a1.77,1.77,0,0,1,1.78,1.77v74.29a1.77,1.77,0,0,1-1.78,1.77H218.64Z" />
+    <line class="cls-4" x1="264.08" y1="26.09" x2="264.08" y2="103.91" />
+    <line class="cls-4" x1="311.13" y1="26.09" x2="311.13" y2="103.91" />
+    <line class="cls-4" x1="353.99" y1="26.09" x2="353.99" y2="103.91" />
+    <line class="cls-4" x1="396" y1="26.09" x2="396" y2="103.91" />
+    <line class="cls-4" x1="434.47" y1="26.09" x2="434.47" y2="103.91" />
+    <line class="cls-4" x1="471.62" y1="26.09" x2="471.62" y2="103.91" />
+    <line class="cls-4" x1="506.55" y1="26.09" x2="506.55" y2="103.91" />
+    <line class="cls-4" x1="538.83" y1="26.09" x2="538.83" y2="103.91" />
+    <line class="cls-4" x1="570.23" y1="26.09" x2="570.23" y2="103.91" />
+    <line class="cls-4" x1="599.41" y1="26.09" x2="599.41" y2="103.91" />
+    <line class="cls-4" x1="626.39" y1="26.09" x2="626.39" y2="103.91" />
+    <line class="cls-4" x1="652.48" y1="26.09" x2="652.48" y2="103.91" />
+    <line class="cls-4" x1="677.24" y1="26.09" x2="677.24" y2="103.91" />
+    <line class="cls-4" x1="698.91" y1="26.09" x2="698.91" y2="103.91" />
+    <line class="cls-4" x1="721.46" y1="26.09" x2="721.46" y2="103.91" />
+    <line class="cls-4" x1="742.25" y1="26.09" x2="742.25" y2="103.91" />
+    <line class="cls-4" x1="761.26" y1="26.09" x2="761.26" y2="103.91" />
+    <line class="cls-4" x1="779.39" y1="26.09" x2="779.39" y2="103.91" />
+    <line class="cls-4" x1="796.64" y1="26.09" x2="796.64" y2="103.91" />
+    <line class="cls-4" x1="813" y1="26.09" x2="813" y2="103.91" />
+    <line class="cls-4" x1="829.36" y1="26.09" x2="829.36" y2="103.91" />
+    <line class="cls-4" x1="843" y1="26.09" x2="843" y2="103.91" />
+    <line class="cls-4" x1="857.36" y1="26.09" x2="857.36" y2="103.91" />
+    <path class="cls-3" d="M1064.75,26.09h0a6.63,6.63,0,0,1,6.63,6.63V97.28a6.63,6.63,0,0,1-6.63,6.63h0a6.63,6.63,0,0,1-6.63-6.63V32.72A6.63,6.63,0,0,1,1064.75,26.09Z" />
+    <circle class="cls-7" cx="331.91" cy="65" r="3.45" />
+    <circle class="cls-7" cx="415.54" cy="65" r="3.45" />
+    <circle class="cls-7" cx="488.58" cy="65" r="3.45" />
+    <circle class="cls-7" cx="554.38" cy="65" r="3.45" />
+    <circle class="cls-7" cx="710.04" cy="65" r="3.45" />
+    <circle class="cls-7" cx="751.89" cy="65" r="3.45" />
+    <circle class="cls-7" cx="788.04" cy="65" r="3.45" />
+    <circle class="cls-7" cx="821.21" cy="65" r="3.45" />
+    <circle class="cls-7" cx="863.73" cy="53.06" r="3.45" />
+    <circle class="cls-7" cx="863.73" cy="76.94" r="3.45" />
+    <circle class="cls-7" cx="639.28" cy="53.06" r="3.45" />
+    <circle class="cls-7" cx="639.28" cy="76.94" r="3.45" />
+    <path class="cls-3" d="M189.26,18.55a3.2,3.2,0,0,0-1.77-.64L4,6.63A3.24,3.24,0,0,0,.63,10.22L6.79,65.34.63,119.78a3.24,3.24,0,0,0,2.92,3.53H4L187.47,112a3.2,3.2,0,0,0,1.77-.64l18.34-7.48V26.09Z" />
+    <g id="string">
+        <line class="str-u" x1="207.58" y1="35.14" x2="1061.38" y2="35.14" /> 
+        <line class="str-u" x1="207.58" y1="47.08" x2="1061.38" y2="47.08" />
+        <line class="str-u" x1="207.58" y1="59.02" x2="1061.38" y2="59.02" />
+        <line class="str-u" x1="207.58" y1="70.96" x2="1061.38" y2="70.96" />
+        <line class="str-u" x1="207.58" y1="82.9" x2="1061.38" y2="82.9" />
+        <line class="str-u" x1="207.58" y1="94.84" x2="1061.38" y2="94.84" />
+        <g id="str1" opacity="0">
+            <line class="str-p" x1="207.58" y1="35.14" x2="1061.38" y2="35.14" /> 
+            <path class="strp-p" d="M198.53,32.87a2.28,2.28,0,1,1-2.28,2.28,2.28,2.28,0,0,1,2.28-2.28m0-2a4.28,4.28,0,1,0,4.28,4.28,4.28,4.28,0,0,0-4.28-4.28Z" />
+            <animate attributeName="opacity" from="1" to="0" begin="indefinite" dur="1s" repeatCount="1" />
+        </g>
+        <g id="str2" opacity="0">
+            <line class="str-p" x1="207.58" y1="47.08" x2="1061.38" y2="47.08" />
+            <path class="strp-p" d="M198.53,44.81a2.28,2.28,0,1,1-2.28,2.28,2.28,2.28,0,0,1,2.28-2.28m0-2a4.28,4.28,0,1,0,4.28,4.28,4.28,4.28,0,0,0-4.28-4.28Z" />
+            <animate attributeName="opacity" from="1" to="0" begin="indefinite" dur="1.5s" repeatCount="0" />
+            <set attributeName="opacity" to="0" begin="indefinite"/>  
+        </g>
+        <g id="str3" opacity="0">
+            <line class="str-p" x1="207.58" y1="59.02" x2="1061.38" y2="59.02" />
+            <path class="strp-p" d="M198.53,56.74A2.28,2.28,0,1,1,196.26,59a2.28,2.28,0,0,1,2.28-2.28m0-2A4.28,4.28,0,1,0,202.81,59a4.28,4.28,0,0,0-4.28-4.28Z" />
+            <animate attributeName="opacity" from="1" to="0" begin="indefinite" dur="1.5s" repeatCount="0" />
+            <set attributeName="opacity" to="0" begin="indefinite"/>  
+        </g>
+        <g id="str4" opacity="0">
+            <line class="str-p" x1="207.58" y1="70.96" x2="1061.38" y2="70.96" />
+            <path class="strp-p" d="M198.53,68.68A2.28,2.28,0,1,1,196.26,71a2.28,2.28,0,0,1,2.28-2.28m0-2A4.28,4.28,0,1,0,202.81,71a4.28,4.28,0,0,0-4.28-4.28Z" />
+            <animate attributeName="opacity" from="1" to="0" begin="indefinite" dur="1.5s" repeatCount="0" />
+            <set attributeName="opacity" to="0" begin="indefinite"/>  
+        </g>
+        <g id="str5" opacity="0">
+            <line class="str-p" x1="207.58" y1="82.9" x2="1061.38" y2="82.9" />
+            <path class="strp-p" d="M198.53,80.62a2.28,2.28,0,1,1-2.28,2.28,2.28,2.28,0,0,1,2.28-2.28m0-2a4.28,4.28,0,1,0,4.28,4.28,4.28,4.28,0,0,0-4.28-4.28Z" />
+            <animate attributeName="opacity" from="1" to="0" begin="indefinite" dur="1.5s" repeatCount="0" />
+            <set attributeName="opacity" to="0" begin="indefinite"/>  
+        </g>
+        <g id="str6" opacity="0">
+            <line class="str-p" x1="207.58" y1="94.84" x2="1061.38" y2="94.84" />
+            <path class="strp-p" d="M198.53,92.56a2.28,2.28,0,1,1-2.28,2.28,2.28,2.28,0,0,1,2.28-2.28m0-2a4.28,4.28,0,1,0,4.28,4.28,4.28,4.28,0,0,0-4.28-4.28Z" />
+            <animate attributeName="opacity" from="1" to="0" begin="indefinite" dur="1.5s" repeatCount="0" />
+            <set attributeName="opacity" to="0" begin="indefinite"/>  
+        </g>
+    </g>
+    <g id="points">
+        <!-- string 1 -->
+        <circle class="fb-u" cx="240.75" cy="35.15" r="4.63" />
+        <circle class="fb-u" cx="287.61" cy="35.14" r="4.63" />
+        <circle class="fb-u" cx="332.56" cy="35.14" r="4.63" />
+        <circle class="fb-u" cx="374.99" cy="35.14" r="4.63" />
+        <circle class="fb-u" cx="415.24" cy="35.14" r="4.63" />
+        <circle class="fb-u" cx="453.04" cy="35.14" r="4.63" />
+        <circle class="fb-u" cx="489.08" cy="35.14" r="4.63" />
+        <circle class="fb-u" cx="522.69" cy="35.14" r="4.63" />
+        <circle class="fb-u" cx="554.53" cy="35.14" r="4.63" />
+        <circle class="fb-u" cx="584.82" cy="35.14" r="4.63" />
+        <circle class="fb-u" cx="612.9" cy="35.14" r="4.63" />
+        <circle class="fb-u" cx="639.43" cy="35.14" r="4.63" />
+        <circle class="fb-u" cx="664.86" cy="35.14" r="4.63" />
+        <circle class="fb-u" cx="688.08" cy="35.14" r="4.63" />
+        <circle class="fb-u" cx="710.19" cy="35.14" r="4.63" />
+        <circle class="fb-u" cx="731.85" cy="35.14" r="4.63" />
+        <circle class="fb-u" cx="751.75" cy="35.14" r="4.63" />
+        <circle class="fb-u" cx="770.33" cy="35.14" r="4.63" />
+        <circle class="fb-u" cx="788.01" cy="35.14" r="4.63" />
+        <circle class="fb-u" cx="804.82" cy="35.14" r="4.63" />
+        <circle class="fb-u" cx="821.21" cy="35.14" r="4.63" />
+        <circle class="fb-u" cx="836.18" cy="35.14" r="4.63" />
+        <circle class="fb-u" cx="850.18" cy="35.14" r="4.63" />
+        <circle class="fb-u" cx="864.28" cy="35.14" r="4.63" />   
+        <!-- string 2 -->
+        <circle class="fb-u" cx="240.75" cy="47.09" r="4.63" />
+        <circle class="fb-u" cx="287.61" cy="47.08" r="4.63" />
+        <circle class="fb-u" cx="332.56" cy="47.09" r="4.63" />
+        <circle class="fb-u" cx="374.99" cy="47.09" r="4.63" />
+        <circle class="fb-u" cx="415.24" cy="47.09" r="4.63" />
+        <circle class="fb-u" cx="453.04" cy="47.09" r="4.63" />
+        <circle class="fb-u" cx="489.08" cy="47.09" r="4.63" />
+        <circle class="fb-u" cx="522.69" cy="47.09" r="4.63" />
+        <circle class="fb-u" cx="554.53" cy="47.09" r="4.63" />
+        <circle class="fb-u" cx="584.82" cy="47.09" r="4.63" />
+        <circle class="fb-u" cx="612.9" cy="47.09" r="4.63" />
+        <circle class="fb-u" cx="639.43" cy="47.09" r="4.63" />
+        <circle class="fb-u" cx="664.86" cy="47.09" r="4.63" />
+        <circle class="fb-u" cx="688.08" cy="47.09" r="4.63" />
+        <circle class="fb-u" cx="710.19" cy="47.09" r="4.63" />
+        <circle class="fb-u" cx="731.85" cy="47.09" r="4.63" />
+        <circle class="fb-u" cx="751.75" cy="47.09" r="4.63" />
+        <circle class="fb-u" cx="770.33" cy="47.09" r="4.63" />
+        <circle class="fb-u" cx="788.01" cy="47.09" r="4.63" />
+        <circle class="fb-u" cx="804.82" cy="47.09" r="4.63" />
+        <circle class="fb-u" cx="821.21" cy="47.09" r="4.63" />
+        <circle class="fb-u" cx="836.18" cy="47.09" r="4.63" />
+        <circle class="fb-u" cx="850.18" cy="47.09" r="4.63" />
+        <circle class="fb-u" cx="864.28" cy="47.09" r="4.63" />     
+        <!-- string 3 -->
+        <circle class="fb-u" cx="240.75" cy="59.03" r="4.63" />
+        <circle class="fb-u" cx="287.61" cy="59.02" r="4.63" />
+        <circle class="fb-u" cx="332.56" cy="59.03" r="4.63" />
+        <circle class="fb-u" cx="374.99" cy="59.03" r="4.63" />
+        <circle class="fb-u" cx="415.24" cy="59.03" r="4.63" />
+        <circle class="fb-u" cx="453.04" cy="59.03" r="4.63" />
+        <circle class="fb-u" cx="489.08" cy="59.03" r="4.63" />
+        <circle class="fb-u" cx="522.69" cy="59.03" r="4.63" />
+        <circle class="fb-u" cx="554.53" cy="59.03" r="4.63" />
+        <circle class="fb-u" cx="584.82" cy="59.03" r="4.63" />
+        <circle class="fb-u" cx="612.9" cy="59.03" r="4.63" />
+        <circle class="fb-u" cx="639.43" cy="59.03" r="4.63" />
+        <circle class="fb-u" cx="664.86" cy="59.03" r="4.63" />
+        <circle class="fb-u" cx="688.08" cy="59.03" r="4.63" />
+        <circle class="fb-u" cx="710.19" cy="59.03" r="4.63" />
+        <circle class="fb-u" cx="731.85" cy="59.03" r="4.63" />
+        <circle class="fb-u" cx="751.75" cy="59.03" r="4.63" />
+        <circle class="fb-u" cx="770.33" cy="59.03" r="4.63" />
+        <circle class="fb-u" cx="788.01" cy="59.03" r="4.63" />
+        <circle class="fb-u" cx="804.82" cy="59.03" r="4.63" />
+        <circle class="fb-u" cx="821.21" cy="59.03" r="4.63" />
+        <circle class="fb-u" cx="836.18" cy="59.03" r="4.63" />
+        <circle class="fb-u" cx="850.18" cy="59.03" r="4.63" />
+        <circle class="fb-u" cx="864.28" cy="59.03" r="4.63" />
+        <!-- string 4 -->
+        <circle class="fb-u" cx="240.75" cy="70.97" r="4.63" />
+        <circle class="fb-u" cx="287.61" cy="70.97" r="4.63" />
+        <circle class="fb-u" cx="332.56" cy="70.97" r="4.63" />
+        <circle class="fb-u" cx="374.99" cy="70.97" r="4.63" />
+        <circle class="fb-u" cx="415.24" cy="70.97" r="4.63" />
+        <circle class="fb-u" cx="453.04" cy="70.97" r="4.63" />
+        <circle class="fb-u" cx="489.08" cy="70.97" r="4.63" />
+        <circle class="fb-u" cx="522.69" cy="70.97" r="4.63" />
+        <circle class="fb-u" cx="554.53" cy="70.97" r="4.63" />
+        <circle class="fb-u" cx="584.82" cy="70.97" r="4.63" />
+        <circle class="fb-u" cx="612.9" cy="70.97" r="4.63" />
+        <circle class="fb-u" cx="639.43" cy="70.97" r="4.63" />
+        <circle class="fb-u" cx="664.86" cy="70.97" r="4.63" />
+        <circle class="fb-u" cx="688.08" cy="70.97" r="4.63" />
+        <circle class="fb-u" cx="710.19" cy="70.97" r="4.63" />
+        <circle class="fb-u" cx="731.85" cy="70.97" r="4.63" />
+        <circle class="fb-u" cx="751.75" cy="70.97" r="4.63" />
+        <circle class="fb-u" cx="770.33" cy="70.97" r="4.63" />
+        <circle class="fb-u" cx="788.01" cy="70.97" r="4.63" />
+        <circle class="fb-u" cx="804.82" cy="70.97" r="4.63" />
+        <circle class="fb-u" cx="821.21" cy="70.97" r="4.63" />
+        <circle class="fb-u" cx="836.18" cy="70.97" r="4.63" />
+        <circle class="fb-u" cx="850.18" cy="70.97" r="4.63" />
+        <circle class="fb-u" cx="864.28" cy="70.97" r="4.63" />
+        <!-- string 5 -->
+        <circle class="fb-u" cx="240.75" cy="82.91" r="4.63" />
+        <circle class="fb-u" cx="287.61" cy="82.9" r="4.63" />
+        <circle class="fb-u" cx="332.56" cy="82.91" r="4.63" />
+        <circle class="fb-u" cx="374.99" cy="82.91" r="4.62" />
+        <circle class="fb-u" cx="415.24" cy="82.9" r="4.63" />
+        <circle class="fb-u" cx="453.04" cy="82.9" r="4.63" />
+        <circle class="fb-u" cx="489.08" cy="82.9" r="4.63" />
+        <circle class="fb-u" cx="522.69" cy="82.9" r="4.63" />
+        <circle class="fb-u" cx="554.53" cy="82.9" r="4.63" />
+        <circle class="fb-u" cx="584.82" cy="82.9" r="4.63" />
+        <circle class="fb-u" cx="612.9" cy="82.9" r="4.63" />
+        <circle class="fb-u" cx="639.43" cy="82.9" r="4.63" />
+        <circle class="fb-u" cx="664.86" cy="82.9" r="4.63" />
+        <circle class="fb-u" cx="688.08" cy="82.9" r="4.63" />
+        <circle class="fb-u" cx="710.19" cy="82.9" r="4.63" />
+        <circle class="fb-u" cx="731.85" cy="82.9" r="4.63" />
+        <circle class="fb-u" cx="751.75" cy="82.9" r="4.63" />
+        <circle class="fb-u" cx="770.33" cy="82.9" r="4.63" />
+        <circle class="fb-u" cx="788.01" cy="82.9" r="4.63" />
+        <circle class="fb-u" cx="804.82" cy="82.9" r="4.63" />
+        <circle class="fb-u" cx="821.21" cy="82.9" r="4.63" />
+        <circle class="fb-u" cx="836.18" cy="82.9" r="4.63" />
+        <circle class="fb-u" cx="850.18" cy="82.9" r="4.63" />
+        <circle class="fb-u" cx="864.28" cy="82.9" r="4.63" />
+        <!-- string 6 -->
+        <circle class="fb-u" cx="240.75" cy="94.85" r="4.63" />
+        <circle class="fb-u" cx="287.61" cy="94.83" r="4.63" />
+        <circle class="fb-u" cx="332.56" cy="94.85" r="4.63" />
+        <circle class="fb-u" cx="374.99" cy="94.85" r="4.63" />
+        <circle class="fb-u" cx="415.24" cy="94.83" r="4.63" />
+        <circle class="fb-u" cx="453.04" cy="94.83" r="4.63" />
+        <circle class="fb-u" cx="489.08" cy="94.83" r="4.63" />
+        <circle class="fb-u" cx="522.69" cy="94.83" r="4.63" />
+        <circle class="fb-u" cx="554.53" cy="94.83" r="4.63" />
+        <circle class="fb-u" cx="584.82" cy="94.83" r="4.63" />
+        <circle class="fb-u" cx="612.9" cy="94.83" r="4.63" />
+        <circle class="fb-u" cx="639.43" cy="94.83" r="4.63" />
+        <circle class="fb-u" cx="664.86" cy="94.83" r="4.63" />
+        <circle class="fb-u" cx="688.08" cy="94.83" r="4.63" />
+        <circle class="fb-u" cx="710.19" cy="94.83" r="4.63" />
+        <circle class="fb-u" cx="731.85" cy="94.83" r="4.63" />
+        <circle class="fb-u" cx="751.75" cy="94.83" r="4.63" />
+        <circle class="fb-u" cx="770.33" cy="94.83" r="4.63" />
+        <circle class="fb-u" cx="788.01" cy="94.83" r="4.63" />
+        <circle class="fb-u" cx="804.82" cy="94.83" r="4.63" />
+        <circle class="fb-u" cx="821.21" cy="94.83" r="4.63" />
+        <circle class="fb-u" cx="836.18" cy="94.83" r="4.63" />
+        <circle class="fb-u" cx="850.18" cy="94.83" r="4.63" />
+        <circle class="fb-u" cx="864.28" cy="94.83" r="4.63" />
+    </g>
+    <ellipse class="cls-10" cx="55.06" cy="90.58" rx="9.46" ry="11.18" />
+    <circle class="cls-10" cx="45.6" cy="90.58" r="6.07" />
+    <ellipse class="cls-10" cx="106.41" cy="86.99" rx="9.46" ry="11.18" />
+    <circle class="cls-10" cx="96.96" cy="86.99" r="6.07" />
+    <ellipse class="cls-10" cx="158.32" cy="84.51" rx="9.46" ry="11.18" />
+    <circle class="cls-10" cx="148.88" cy="84.51" r="6.07" />
+    <ellipse class="cls-10" cx="55.06" cy="39.42" rx="9.46" ry="11.18" />
+    <circle class="cls-10" cx="45.6" cy="39.42" r="6.07" />
+    <ellipse class="cls-10" cx="106.41" cy="43.01" rx="9.46" ry="11.18" />
+    <circle class="cls-10" cx="96.96" cy="43.01" r="6.07" />
+    <ellipse class="cls-10" cx="158.32" cy="45.49" rx="9.46" ry="11.18" />
+    <circle class="cls-10" cx="148.88" cy="45.49" r="6.07" />
+</svg>

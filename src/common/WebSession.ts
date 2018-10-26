@@ -1,4 +1,5 @@
-import {FingerBoard} from './FingerBoard';
+import { FingerBoard } from './FingerBoard';
+import { DataSource } from './DataSource';
 
 class FunctionArray {
     [index: string]: Array<Function>;
@@ -22,21 +23,21 @@ export interface UserInfo {
 }
 
 export class WebSession {
-    private wsGuitar: WebSocket;
     private wsControl: WebSocket;
     private myName: string;
     private usersArr: Array<UserInfo> = [];
+    private dataSources: Array<DataSource> = [];
 
     private listeningFunction: FunctionArray;
 
     constructor(myName: string, wsPrefix: string, session: string) {
         this.myName = myName;
-        this.wsGuitar = new WebSocket(`${wsPrefix}/${session}/guitar/session`);
+        //this.wsGuitar = new WebSocket(`${wsPrefix}/${session}/guitar/session`);
         this.wsControl = new WebSocket(`${wsPrefix}/${session}/control/session`);
         this.wsControl.onmessage = this.onCtlMessage.bind(this);
 
         let eventTypes = new Array<string>();
-        eventTypes.push("new member");
+        eventTypes.push("newMember");
         eventTypes.push("data");
         // eventTypes.push("bye");
         this.listeningFunction = new FunctionArray(eventTypes);
@@ -47,7 +48,6 @@ export class WebSession {
         // this.wsControl.onclose = () => {
         //     this.wsControl.send(`bye ${myName}`);
         // }
-        this.wsGuitar.url;
     }
 
     private onCtlMessage(e: MessageEvent): void {
@@ -61,7 +61,7 @@ export class WebSession {
                 const name = result.split(" ")[1];
                 let newUser = {name: name, fb:new FingerBoard()};
                 this.usersArr.push(newUser);
-                this.doCallback("new member", newUser);
+                this.doCallback("newMember", newUser);
                 this.wsControl.send(`loha ${this.myName}`);
 
             } else if(action == ControlAction.Loha) {
@@ -71,7 +71,7 @@ export class WebSession {
                     // not int users array, update
                     let newUser = {name: name, fb:new FingerBoard()};
                     this.usersArr.push(newUser);
-                    this.doCallback("new member", newUser);
+                    this.doCallback("newMember", newUser);
                 }
                 else {
                     console.log("User " + name + " already in array!");
@@ -101,8 +101,8 @@ export class WebSession {
     }
 
     public on(event: string, func: (user?: UserInfo, data?: string) => void) {
-        if(event == "new member") {
-            this.listeningFunction["new member"].push(func);
+        if(event == "newMember") {
+            this.listeningFunction["newMember"].push(func);
         }
         else if(event == "data") {
             this.listeningFunction["data"].push(func);
@@ -113,7 +113,7 @@ export class WebSession {
     }
 
     private doCallback(event: string, user?: UserInfo, data?: string) {
-        if(event == "new member" && user != undefined) {
+        if(event == "newMember" && user != undefined) {
             this.listeningFunction[event].forEach(func => {
                 func(user);
             });
@@ -144,8 +144,8 @@ export class WebSession {
         else return -1;
     }
 
-    public add() {
-        
+    public add(ds: DataSource) {
+        this.dataSources.push(ds)
     }
 
     public get name(): string {

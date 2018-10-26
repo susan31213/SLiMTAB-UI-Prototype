@@ -1,19 +1,24 @@
 import { FingerBoard, NoteInfo } from '../common/FingerBoard';
 import { WebSession, UserInfo } from '../common/WebSession';
+import { UserDataSource } from '../common/UserDataSource'
 var fb: FingerBoard;
 var wb: WebSession;
+var userData: UserDataSource;
 
-// wb.add(new )
 function init() {
   fb = new FingerBoard();
+  wb = new WebSession(Date.now().toString(), 'ws://localhost:9002', 'ts');
+  userData = new UserDataSource(fb, wb);
 
-  wb = new WebSession(Date.now().toString(), 'ws://140.116.82.7:9002', 'ts');
   console.log(`Websocket: ${wb.name}`);
-  wb.on("new member", addFingerTab);
-  wb.on("data", changeFingerTab);
+  wb.on("newMember", addFingerTab);
+  wb.on("data", changeOthersFingerTab);
 
+  userData.on("press", onGUIPress);
+  userData.on("unpress", onGUIUnress);
+  userData.on("pick", onGUIPick);
   // window.addEventListener("resize", redrawCanvas, false);
-  redrawCanvas(fb, "local");
+  drawCanvas(fb, "local");
 
 
 
@@ -21,36 +26,45 @@ function init() {
   let pressBtn = document.getElementById("pressBtn") as HTMLElement;
   let unpressBtn = document.getElementById("unpressBtn") as HTMLElement;
   let pickBtn = document.getElementById("pickBtn") as HTMLElement;
+  let showDebugBtn = document.getElementById("showDebug") as HTMLElement;
+
+  showDebugBtn.addEventListener("click", () => {
+    let db = document.getElementById("debugger") as HTMLElement;
+    if(db != null && db.style.display == 'none') {
+      db.style.display = '';
+    }
+    else if(db != null && db.style.display == '') {
+      db.style.display = 'none';
+    }
+  });
 
   pressBtn.addEventListener("click", () => {
     let stringID: number = + ((document.getElementById("stringID") as HTMLInputElement).value);
     let note: string = (document.getElementById("note") as HTMLInputElement).value;
-    fb.press(stringID as number, note);
-    wb.wsCtrl.send(`data ${wb.name},press,${stringID},${note}`);
+    userData.do("press", {stringID, note});
   });
 
   unpressBtn.addEventListener("click", () => {
     let stringID: number = + ((document.getElementById("stringID") as HTMLInputElement).value);
     let note: string = (document.getElementById("note") as HTMLInputElement).value;
-    fb.unPress(stringID as number, note);
-    wb.wsCtrl.send(`data ${wb.name},unPress,${stringID},${note}`);
+    userData.do("unpress", {stringID, note});
   });
 
   pickBtn.addEventListener("click", () => {
     let stringID: number = + ((document.getElementById("stringID") as HTMLInputElement).value);
-    fb.pick(stringID as number);
-    wb.wsCtrl.send(`data ${wb.name},pick,${stringID}`);
+    let note:string = "";
+    userData.do("pick", {stringID, note});
   });
 
-  // Callbacks (Debuggggggggggg)
-  fb.on("press", f1);
-  function f1(note: NoteInfo) {
+  // Click note div Callback function
+  fb.on("press", clickNote);
+  function clickNote(note: NoteInfo) {
     let htmlDiv = note.htmlElement;
-    console.log("f1: " + note.divIndex + ", " + note.string + " " + note.note + " ");
+    //console.log("f1: " + note.divIndex + ", " + note.string + " " + note.note + " ");
     if(htmlDiv != undefined) {
       if(htmlDiv.className == "press") {
-        htmlDiv.className = "unPress";
-        wb.wsCtrl.send(`data ${wb.name},unPress,${note.string},${note.note}`);
+        htmlDiv.className = "unpress";
+        wb.wsCtrl.send(`data ${wb.name},unpress,${note.string},${note.note}`);
       }
       else {
         htmlDiv.className = "press";
@@ -58,10 +72,9 @@ function init() {
       }
     }
   }
-  // Callbacks end (Debuggggggggggg)
 
-  function redrawCanvas(fb: FingerBoard, name: string) {
-    fb.drawCanvasAndPressPoints();
+  function drawCanvas(fb: FingerBoard, name: string) {
+    fb.drawFingerTab();
     let container: HTMLElement | null = document.getElementById('container');
     if(container != null) {
       let fbContainer = document.createElement("div");
@@ -78,23 +91,38 @@ function init() {
     }
   }
 
+  function onGUIPress(noteInfo: {stringID: number, note: string}) {
+    fb.press(noteInfo.stringID, noteInfo.note);
+    wb.wsCtrl.send(`data ${wb.name},press,${noteInfo.stringID},${noteInfo.note}`);
+  }
+
+  function onGUIUnress(noteInfo: {stringID: number, note: string}) {
+    fb.unpress(noteInfo.stringID, noteInfo.note);
+    wb.wsCtrl.send(`data ${wb.name},unpress,${noteInfo.stringID},${noteInfo.note}`);
+  }
+
+  function onGUIPick(noteInfo: {stringID: number, note: string}) {
+    fb.pick(noteInfo.stringID);
+    wb.wsCtrl.send(`data ${wb.name},pick,${noteInfo.stringID}`);
+  }
+
   function addFingerTab(user?: UserInfo): void {
     if(user != undefined) {
-      redrawCanvas(user.fb, user.name);
+      drawCanvas(user.fb, user.name);
     }
       
   }
 
-  function changeFingerTab(user?: UserInfo, data?: string) {
+  function changeOthersFingerTab(user?: UserInfo, data?: string) {
     if(user != undefined && data != undefined) {
       let splited = data.split(",");
       let action = splited[1];
       let stringID: number = + splited[2];
-      let note = splited[3];
+      let note = (action == "pick")? "":splited[3];
       if(action == "press") {
         user.fb.press(stringID, note);
-      } else if(action == "unPress") {
-        user.fb.unPress(stringID, note);
+      } else if(action == "unpress") {
+        user.fb.unpress(stringID, note);
       } else if(action == "pick") {
         user.fb.pick(stringID);
       }
