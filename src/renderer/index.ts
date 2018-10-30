@@ -1,5 +1,5 @@
 import { FingerBoard, NoteInfo } from '../common/FingerBoard';
-import { WebSession, UserInfo } from '../common/WebSession';
+import { WebSession, /*UserInfo*/ } from '../common/WebSession';
 import { UserDataSource } from '../common/UserDataSource'
 var fb: FingerBoard;
 var wb: WebSession;
@@ -11,14 +11,14 @@ function init() {
   userData = new UserDataSource(fb, wb);
 
   console.log(`Websocket: ${wb.name}`);
-  wb.on("newMember", addFingerTab);
-  wb.on("data", changeOthersFingerTab);
+  // wb.on("newMember", addFingerTab);
+  // wb.on("data", changeOthersFingerTab);
 
   userData.on("press", onGUIPress);
   userData.on("unpress", onGUIUnress);
   userData.on("pick", onGUIPick);
-  // window.addEventListener("resize", redrawCanvas, false);
-  drawCanvas(fb, "local");
+  drawCanvas(fb);
+  (document.getElementById("debugger") as HTMLElement).style.display = 'none';
 
 
 
@@ -73,15 +73,15 @@ function init() {
     }
   }
 
-  function drawCanvas(fb: FingerBoard, name: string) {
+  function drawCanvas(fb: FingerBoard) {
     fb.drawFingerTab();
-    let container: HTMLElement | null = document.getElementById('container');
+    let container: HTMLElement | null = document.getElementById('footer');
     if(container != null) {
       let fbContainer = document.createElement("div");
-      let nameText = document.createElement("div");
-      nameText.innerHTML = name;
-      fbContainer.id = name;
-      fbContainer.appendChild(nameText);
+      // let nameText = document.createElement("div");
+      // nameText.innerHTML = name;
+      // fbContainer.id = name;
+      // fbContainer.appendChild(nameText);
       fbContainer.appendChild(fb.domElement);
       fbContainer.style.height = (fb.domElement.height+2) + "px";
       fbContainer.style.width = (fb.domElement.width) + "px";
@@ -106,28 +106,28 @@ function init() {
     wb.wsCtrl.send(`data ${wb.name},pick,${noteInfo.stringID}`);
   }
 
-  function addFingerTab(user?: UserInfo): void {
-    if(user != undefined) {
-      drawCanvas(user.fb, user.name);
-    }
+  // function addFingerTab(user?: UserInfo): void {
+  //   if(user != undefined) {
+  //     drawCanvas(user.fb, user.name);
+  //   }
       
-  }
+  // }
 
-  function changeOthersFingerTab(user?: UserInfo, data?: string) {
-    if(user != undefined && data != undefined) {
-      let splited = data.split(",");
-      let action = splited[1];
-      let stringID: number = + splited[2];
-      let note = (action == "pick")? "":splited[3];
-      if(action == "press") {
-        user.fb.press(stringID, note);
-      } else if(action == "unpress") {
-        user.fb.unpress(stringID, note);
-      } else if(action == "pick") {
-        user.fb.pick(stringID);
-      }
-    }
-  }
+  // function changeOthersFingerTab(user?: UserInfo, data?: string) {
+  //   if(user != undefined && data != undefined) {
+  //     let splited = data.split(",");
+  //     let action = splited[1];
+  //     let stringID: number = + splited[2];
+  //     let note = (action == "pick")? "":splited[3];
+  //     if(action == "press") {
+  //       user.fb.press(stringID, note);
+  //     } else if(action == "unpress") {
+  //       user.fb.unpress(stringID, note);
+  //     } else if(action == "pick") {
+  //       user.fb.pick(stringID);
+  //     }
+  //   }
+  // }
 
   // function deleteFingerTab(user?: UserInfo) {
   //   if(user != undefined) {

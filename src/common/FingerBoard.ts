@@ -86,7 +86,7 @@ export class FingerBoard {
     {
         this.domElementCache.id = "svg-object";
         this.domElementCache.data = "../../fingertab.svg";
-        this.domElementCache.width = "1503.2px";
+        this.domElementCache.width = "1450px";
         this.domElementCache.height = "182.288px";
 
         let a = this.domElementCache as HTMLObjectElement;
@@ -98,7 +98,6 @@ export class FingerBoard {
                 for(var i=0; i<self.pressPointElementCache.childElementCount; i++) {
                     self.pressPointElementCache.children[i].id = `${i}`;
                 }
-
                 self.stringElementsCache.push(svgDoc.getElementById("str1") as HTMLElement);
                 self.stringElementsCache.push(svgDoc.getElementById("str2") as HTMLElement);
                 self.stringElementsCache.push(svgDoc.getElementById("str3") as HTMLElement);

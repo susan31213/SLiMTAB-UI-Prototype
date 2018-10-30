@@ -2,7 +2,6 @@
 <html>
   <head>
     <meta charset="utf-8">
-<!-- https://stackoverflow.com/questions/32621988/electron-jquery-is-not-defined -->
     <title>This is a boilerplate</title>
     <script>if (typeof module === 'object') {window.module = module; module = undefined;}</script>
     <script src="../renderer/static/js/jquery-2.2.4.js"></script>
@@ -10,20 +9,31 @@
     <link rel="stylesheet" href="myStyle.css">
     <script>if (window.module) module = window.module;</script>
   </head>
-  <body>
-    <h1 id=title>
-      Guitar
-    </h1>
-    <input id='showDebug' type='button' value="show/hidden Debugger">
-    <div id='debugger'>
-      <p>StringID: <input id="stringID" type="text" value="6"> </p>
-      <p>Note: <input id="note" type="text" value="F#2"></p>
-      <input id="pressBtn" type="button" value="Press"> 
-      <input id="unpressBtn" type="button" value="Unpress"> 
-      <input id="pickBtn" type="button" value="Pick">
+  <body topmargin="0" leftmargin="0" rightmargin="0">
+    <div class="ui-container">
+        <div class="title">
+          <div class="logo">
+            <img class="logo-container" src="img/logo.png">
+          </div>
+          <div class="space"></div>
+          <div class="instrument">Instrument</div>
+          <div class="tuning">Tuning</div>
+          <div id='showDebug' class="debug">Debug</div>
+          <div class="quit">Quit</div>
+          <div class="profile">
+            <img class="profile-container" src="img/profile_btn_normal.png"></div>
+        </div>
+        <div class="mid">
+          <div class="video"></div>
+        </div>
+        <div id="footer" class="footer"></div>
+        <div id='debugger' class="debugger">
+          <p>StringID: <input id="stringID" type="text" class="textarea" value="6"> </p>
+          <p>Note: <input id="note" type="text" class="textarea" value="F#2"></p>
+          <input id="pressBtn" type="button" class="button" value="Press"> 
+          <input id="unpressBtn" type="button" class="button" value="Unpress"> 
+          <input id="pickBtn" type="button" class="button" value="Pick">
+        </div>
     </div>
-    <div id='container'></div><br>
-
-
   </body>
 </html>

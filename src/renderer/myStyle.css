@@ -1,5 +1,5 @@
 /* for svg */
-.cls-1,.cls-4,.cls-5,.cls-6 {
+/* .cls-1,.cls-4,.cls-5,.cls-6 {
     fill:none;
     stroke-miterlimit:10;
 }
@@ -44,49 +44,160 @@
 }
 .cls-10 {
     fill:#252525;
-}
+} */
 /* end for svg */
-#container {
-    position: relative;
-    padding: 0;
-    margin: auto;
-    display: block;
+.ui-container{
+    display: grid;
+    grid-template-rows:  64px 1fr 160px;
+    grid-template-areas: 
+      "t"
+      "m"
+      "f";
+    width: 100%;
+    height: 100%
+
+}
+.title {
+    grid-area: t;
+    grid-template-columns: 170px 1fr 120px 110px 90px 80px;
+    display: grid;
+
+}
+.title > .logo{   
+    background: #252525;
+    text-align: center;
+    padding-top: 15px;
+    padding-bottom: 15px;
 }
 
-#container canvas, #pressPoint {
-    position: absolute;
-}
-
-canvas {
-    border: 1px solid black;
-    box-sizing: border-box;
-    border-left-width: 10px;
-    /* display: block; */
-    margin: 0 auto;
-    position:relative;
-}
-
-#title {
+.logo-container{
+    width: 120px;
+    height: 34px;
+    background: #252525;
     text-align: center;
 }
 
-#pressPointContainer {
-    width: inherit;
-    padding-left: 10px;
+.title > .space{   
+    background: #252525;
+}
+.title > .instrument{
+    color:#cccccc;
+    background: #252525;
+    text-align: center;
+    padding-top: 20px;
 }
 
-#pressPoint {
-    border-radius: 50%;
-    margin: 1px;
-    vertical-align: top;
-    position: relative;
-    display: inline-table;
+.title > .tuning{
+    color:#cccccc;
+    background: #252525;
+    text-align: center;
+    padding-top: 20px;
+
+}
+.title > .debug{
+    color:#cccccc;
+    background: #252525;
+    text-align: center;
+    padding-top: 20px;
+
+}
+.title > .quit{
+    color:#cccccc;
+    background: #252525;
+    text-align: center;
+    padding-top: 20px;
+  
+}
+.title > .profile{
+    background: #252525;
+    text-align: center;
+    padding-top: 18px;
+   
+}
+.profile-container{
+    height: 30px;
+    background: #252525;
+    text-align: center;
+}
+.mid {
+    grid-area: m;
+    grid-template-areas: 
+      ". a .";
+    grid-template-columns:1fr 5fr 1fr;
+    display: grid;
+    background: #000000;
+}
+.mid > .video{
+    grid-area: a;
+    background: #ffffff;
+    /* position: relative; */
+    height: auto;
+    width: 100%; 
+    padding-bottom: 56%;
 }
 
-.press {
-    background-color: blue;
+.footer{
+    grid-area: f;
+    background: #252525;
+    text-align: center;
+    height: 200px;
+}
+.footer > div > #svg-object {
+    padding-top: 10px;
 }
 
-.unpress {
-    background-color: transparent;
+.instrument:hover{
+    color: #E99415
+}
+
+.tuning:hover{
+    color: #E99415
+}
+.debug:hover{
+    color: #E99415
+}
+.quit:hover{
+    color: #E99415
+    
+}  
+.instrument{cursor: pointer; }
+.tuning{cursor: pointer; }
+.debug{cursor: pointer; }
+.quit{cursor: pointer; }
+
+.debugger {
+    position:fixed; top:50%; left:50%;
+    background: #252525;
+}
+.debugger {
+    color: #cccccc;
+    text-align: center;
+    position:fixed; top:50%; left:50%;
+    background: #252525;
+    border: 4px #cccccc;
+    border-radius: 10px;
+    width: 250px;
+    height: 130px;
+    margin-top: -65px;     /*高度的一半*/
+    margin-left: -125px;    /*寬度的一半*/
+}
+.debugger > input[type=button] {
+    background-color: #505050;
+    border: none;
+    color: #cccccc;
+
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 16px;
+    margin: 4px 3px;
+    cursor: pointer;
+}
+.debugger > p > .textarea {
+    color: #cccccc;
+    background-color: #505050;
+    border: 1px #cccccc;
+    border-radius: 4px;
+    padding: 3px 4px;
+    box-sizing: border-box;
 }
