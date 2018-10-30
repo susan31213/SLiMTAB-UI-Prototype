@@ -32,7 +32,6 @@ export class WebSession {
 
     constructor(myName: string, wsPrefix: string, session: string) {
         this.myName = myName;
-        //this.wsGuitar = new WebSocket(`${wsPrefix}/${session}/guitar/session`);
         this.wsControl = new WebSocket(`${wsPrefix}/${session}/control/session`);
         this.wsControl.onmessage = this.onCtlMessage.bind(this);
 
@@ -57,7 +56,6 @@ export class WebSession {
             const result = reader.result;
             let action = this.detectMsg(reader.result);
             if(action == ControlAction.Hello) {
-
                 const name = result.split(" ")[1];
                 let newUser = {name: name, fb:new FingerBoard()};
                 this.usersArr.push(newUser);
@@ -65,7 +63,6 @@ export class WebSession {
                 this.wsControl.send(`loha ${this.myName}`);
 
             } else if(action == ControlAction.Loha) {
-
                 const name = result.split(" ")[1];
                 if(this.usersArr.filter((element) => element.name == name).length == 0) {
                     // not int users array, update
@@ -78,7 +75,6 @@ export class WebSession {
                 }
 
             } else if(action == ControlAction.Data) {
-
                 // data username,action,stringIndex,note
                 const name = result.split(" ")[1].split(",")[0];
                 this.usersArr.forEach(user => {

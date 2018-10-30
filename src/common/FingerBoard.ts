@@ -16,46 +16,23 @@ class Dictionary {
 }
 const noteNumberDic = new Dictionary(["C", "D", "E", "F", "G", "A", "B"], [0, 2, 4, 5, 7, 9, 11]);
 
-class StringStatus {
-    playing: boolean;
-    start: number;
-    elapsed: number;
-    duration: number;
-
-    constructor() {
-        this.playing = false;
-        this.start = -1;
-        this.elapsed = -1;
-        this.duration = 800;
-    }
-}
-
 export class NoteInfo {
-    htmlElement: HTMLElement | undefined;
     divIndex: number;
     string: number;
     note: string;
     constructor(str: string) {
         let splited = str.split(",");
         this.divIndex = parseInt(splited[0]);
-        let ele = document.getElementById("pressPointContainer");
-        if(ele != null)
-            this.htmlElement = ele.children.item(this.divIndex) as HTMLElement;
-        else
-            this.htmlElement = undefined;
         this.string = parseInt(splited[1]);
         this.note = splited[2];
     }
 }
-
-// const stringInterval = 30;
 
 export class FingerBoard {
     private config: FingerBoardConfig;
     private domElementCache: HTMLObjectElement = document.createElement("object");
     private pressPointElementCache: HTMLElement = document.createElement("div");
     private stringElementsCache: Array<HTMLElement> = [];
-    private stringStutasCache: Array<StringStatus> = [];
 
     private pressFunctions: Array<Function> = [];
     private unPressFunctions: Array<Function> = [];
@@ -72,14 +49,7 @@ export class FingerBoard {
 
         this.config.baseTones.forEach(element => {
             this.baseToneNumbers.push(this.note2num(element));
-
-            // init string stutas...
-            this.stringStutasCache.push(new StringStatus());
         });
-
-        // Create Canvas & press points
-        // this.drawCanvasAndPressPoints();
-
     }
 
     public drawFingerTab()
@@ -117,23 +87,23 @@ export class FingerBoard {
             this.pickFunctions.push(func);
     }
 
-    public unSubscribe(event: string, func: (note: NoteInfo) => void) {
-        if(event == "press") {
-            this.pressFunctions.forEach( (element, idx) => {
-                if(element == func) this.pressFunctions.splice(idx, 1);
-            });
-        }
-        else if(event == "unPress") {
-            this.unPressFunctions.forEach( (element, idx) => {
-                if(element == func) this.unPressFunctions.splice(idx, 1);
-            });
-        }
-        else if(event == "pick") {
-            this.pickFunctions.forEach( (element, idx) => {
-                if(element == func) this.pickFunctions.splice(idx, 1);
-            });
-        }
-    }
+    // public unSubscribe(event: string, func: (note: NoteInfo) => void) {
+    //     if(event == "press") {
+    //         this.pressFunctions.forEach( (element, idx) => {
+    //             if(element == func) this.pressFunctions.splice(idx, 1);
+    //         });
+    //     }
+    //     else if(event == "unPress") {
+    //         this.unPressFunctions.forEach( (element, idx) => {
+    //             if(element == func) this.unPressFunctions.splice(idx, 1);
+    //         });
+    //     }
+    //     else if(event == "pick") {
+    //         this.pickFunctions.forEach( (element, idx) => {
+    //             if(element == func) this.pickFunctions.splice(idx, 1);
+    //         });
+    //     }
+    // }
 
     public press(stringId: number, note: string): void {        
         let diff = this.note2num(note) - this.baseToneNumbers[stringId -1];
@@ -153,8 +123,6 @@ export class FingerBoard {
 
     public pick(stringId: number): void {
         console.log("Pick: " + stringId);
-        this.stringStutasCache[stringId-1].playing = true;
-        this.stringStutasCache[stringId-1].start = -1;
         var element: any = this.stringElementsCache[stringId-1].children[2];
         element.beginElement();
     }
@@ -169,10 +137,6 @@ export class FingerBoard {
 
     get stringElements(): Array<HTMLElement> {
         return this.stringElementsCache;
-    }
-
-    get stringStutas(): Array<StringStatus> {
-        return this.stringStutasCache;
     }
 
     private note2num(note: string | null): number 

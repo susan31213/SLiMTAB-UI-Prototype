@@ -1,5 +1,5 @@
-import { FingerBoard, NoteInfo } from '../common/FingerBoard';
-import { WebSession, /*UserInfo*/ } from '../common/WebSession';
+import { FingerBoard } from '../common/FingerBoard';
+import { WebSession, UserInfo } from '../common/WebSession';
 import { UserDataSource } from '../common/UserDataSource'
 var fb: FingerBoard;
 var wb: WebSession;
@@ -10,14 +10,18 @@ function init() {
   wb = new WebSession(Date.now().toString(), 'ws://localhost:9002', 'ts');
   userData = new UserDataSource(fb, wb);
 
+  // reg the other user callback functions
   console.log(`Websocket: ${wb.name}`);
-  // wb.on("newMember", addFingerTab);
-  // wb.on("data", changeOthersFingerTab);
-
-  userData.on("press", onGUIPress);
-  userData.on("unpress", onGUIUnress);
-  userData.on("pick", onGUIPick);
   drawCanvas(fb);
+  wb.on("newMember", addFingerTab);       // on member join
+  wb.on("data", changeOthersFingerTab);   // on other's data arrived
+
+  // Self note info callback functions
+  userData.on("press", onSelfPress);
+  userData.on("unpress", onSelfUnpress);
+  userData.on("pick", onSelfPick);
+
+  // hide debugger
   (document.getElementById("debugger") as HTMLElement).style.display = 'none';
 
 
@@ -41,101 +45,71 @@ function init() {
   pressBtn.addEventListener("click", () => {
     let stringID: number = + ((document.getElementById("stringID") as HTMLInputElement).value);
     let note: string = (document.getElementById("note") as HTMLInputElement).value;
-    userData.do("press", {stringID, note});
+    if($('input[name="play type"]:checked').val() == "send")
+      userData.do("press", {stringID, note});
+    else if($('input[name="play type"]:checked').val() == "receive")
+      fb.press(stringID, note);
   });
 
   unpressBtn.addEventListener("click", () => {
     let stringID: number = + ((document.getElementById("stringID") as HTMLInputElement).value);
     let note: string = (document.getElementById("note") as HTMLInputElement).value;
-    userData.do("unpress", {stringID, note});
+    if($('input[name="play type"]:checked').val() == "send")
+      userData.do("unpress", {stringID, note});
+    else if($('input[name="play type"]:checked').val() == "receive")
+      fb.unpress(stringID, note);
   });
 
   pickBtn.addEventListener("click", () => {
     let stringID: number = + ((document.getElementById("stringID") as HTMLInputElement).value);
     let note:string = "";
-    userData.do("pick", {stringID, note});
+    if($('input[name="play type"]:checked').val() == "send")
+      userData.do("pick", {stringID, note});
+    else if($('input[name="play type"]:checked').val() == "receive")
+      fb.pick(stringID);
   });
-
-  // Click note div Callback function
-  fb.on("press", clickNote);
-  function clickNote(note: NoteInfo) {
-    let htmlDiv = note.htmlElement;
-    //console.log("f1: " + note.divIndex + ", " + note.string + " " + note.note + " ");
-    if(htmlDiv != undefined) {
-      if(htmlDiv.className == "press") {
-        htmlDiv.className = "unpress";
-        wb.wsCtrl.send(`data ${wb.name},unpress,${note.string},${note.note}`);
-      }
-      else {
-        htmlDiv.className = "press";
-        wb.wsCtrl.send(`data ${wb.name},press,${note.string},${note.note}`);
-      }
-    }
-  }
 
   function drawCanvas(fb: FingerBoard) {
     fb.drawFingerTab();
     let container: HTMLElement | null = document.getElementById('footer');
     if(container != null) {
-      let fbContainer = document.createElement("div");
-      // let nameText = document.createElement("div");
-      // nameText.innerHTML = name;
-      // fbContainer.id = name;
-      // fbContainer.appendChild(nameText);
-      fbContainer.appendChild(fb.domElement);
-      fbContainer.style.height = (fb.domElement.height+2) + "px";
-      fbContainer.style.width = (fb.domElement.width) + "px";
-      fbContainer.appendChild(fb.pressPointElements);
-      container.appendChild(fbContainer);
+      container.appendChild(fb.domElement);
       container.appendChild(document.createElement("br"));
     }
   }
 
-  function onGUIPress(noteInfo: {stringID: number, note: string}) {
-    fb.press(noteInfo.stringID, noteInfo.note);
+  function onSelfPress(noteInfo: {stringID: number, note: string}) {
     wb.wsCtrl.send(`data ${wb.name},press,${noteInfo.stringID},${noteInfo.note}`);
   }
 
-  function onGUIUnress(noteInfo: {stringID: number, note: string}) {
-    fb.unpress(noteInfo.stringID, noteInfo.note);
+  function onSelfUnpress(noteInfo: {stringID: number, note: string}) {
     wb.wsCtrl.send(`data ${wb.name},unpress,${noteInfo.stringID},${noteInfo.note}`);
   }
 
-  function onGUIPick(noteInfo: {stringID: number, note: string}) {
-    fb.pick(noteInfo.stringID);
+  function onSelfPick(noteInfo: {stringID: number, note: string}) {
     wb.wsCtrl.send(`data ${wb.name},pick,${noteInfo.stringID}`);
   }
 
-  // function addFingerTab(user?: UserInfo): void {
-  //   if(user != undefined) {
-  //     drawCanvas(user.fb, user.name);
-  //   }
-      
-  // }
+  function addFingerTab(user?: UserInfo): void {
+    // save the other user's info...
+    console.log(user);
+  }
 
-  // function changeOthersFingerTab(user?: UserInfo, data?: string) {
-  //   if(user != undefined && data != undefined) {
-  //     let splited = data.split(",");
-  //     let action = splited[1];
-  //     let stringID: number = + splited[2];
-  //     let note = (action == "pick")? "":splited[3];
-  //     if(action == "press") {
-  //       user.fb.press(stringID, note);
-  //     } else if(action == "unpress") {
-  //       user.fb.unpress(stringID, note);
-  //     } else if(action == "pick") {
-  //       user.fb.pick(stringID);
-  //     }
-  //   }
-  // }
-
-  // function deleteFingerTab(user?: UserInfo) {
-  //   if(user != undefined) {
-  //     console.log("remove user: " + user.name);
-  //     // let ele = document.getElementById(user.name);
-  //     // if(ele != null && ele.parentNode != null) ele.parentNode.removeChild(ele);
-  //   }
-  //}
+  function changeOthersFingerTab(user?: UserInfo, data?: string) {
+    if(user != undefined && data != undefined) {
+      let splited = data.split(",");
+      let action = splited[1];
+      let stringID: number = + splited[2];
+      let note = (action == "pick")? "":splited[3];
+      if(action == "press") {
+        fb.press(stringID, note);
+      } else if(action == "unpress") {
+        fb.unpress(stringID, note);
+      } else if(action == "pick") {
+        fb.pick(stringID);
+      }
+    }
+  }
 }
 
 
