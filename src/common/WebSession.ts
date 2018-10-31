@@ -1,4 +1,3 @@
-import { FingerBoard } from './FingerBoard';
 import { DataSource } from './DataSource';
 
 class FunctionArray {
@@ -10,134 +9,118 @@ class FunctionArray {
     }
 }
 
-enum ControlAction {
-    Hello,
-    Bye,
-    Loha,
-    Data
-}
+enum SessionInfoOp {
+    eMsg=0xAA,
+    eQueryResult=0xAB,
+    eEnter=0xBB,
+    eLeave=0xCC
+};
 
-export interface UserInfo {
-    name: string;
-    fb: FingerBoard;
-}
+export enum SessionCommandOp {
+    eBroadcast,
+    eName=0x01,
+    eQueryParticipant,
+    eSlient,
+    eAdmin=0x80,
+    eAdminKick=0x81
+};
+
+class ServerMsg {
+    opcode: SessionInfoOp;
+    from: string;
+    data: Array<string | number>;
+    constructor(array: ArrayBuffer) {
+        var wordarray = new Uint8Array(array);
+        this.opcode = wordarray[0];
+        this.from = "";
+        this.data = [];
+        if(this.opcode != SessionInfoOp.eQueryResult) {
+            for(var i=1; i<9; i++)
+                this.from += wordarray[i].toString();
+            for(var i=9; i< wordarray.length; i++)
+                this.data.push(wordarray[i]);
+        }
+        else {
+            for(var i=1; i<wordarray.length; i++)
+                this.data.push(wordarray[i]);
+        }
+    }
+};
 
 export class WebSession {
     private wsControl: WebSocket;
     private myName: string;
-    private usersArr: Array<UserInfo> = [];
     private dataSources: Array<DataSource> = [];
 
     private listeningFunction: FunctionArray;
 
     constructor(myName: string, wsPrefix: string, session: string) {
         this.myName = myName;
-        this.wsControl = new WebSocket(`${wsPrefix}/${session}/control/session`);
+        this.wsControl = new WebSocket(`${wsPrefix}/${session}/control/session2`);
+        this.wsControl.binaryType = "arraybuffer";
         this.wsControl.onmessage = this.onCtlMessage.bind(this);
 
         let eventTypes = new Array<string>();
-        eventTypes.push("newMember");
+        eventTypes.push("enter");
         eventTypes.push("data");
-        // eventTypes.push("bye");
+        eventTypes.push("leave");
         this.listeningFunction = new FunctionArray(eventTypes);
 
         this.wsControl.onopen = () => {
-            this.wsControl.send(`hello ${myName}`);
+            // say hi?
         }
-        // this.wsControl.onclose = () => {
-        //     this.wsControl.send(`bye ${myName}`);
-        // }
+        // this.wsControl.onclose = () => {}
     }
 
     private onCtlMessage(e: MessageEvent): void {
-        var reader = new FileReader();
-        reader.readAsText(e.data);
-        reader.onload = () => {
-            const result = reader.result;
-            let action = this.detectMsg(reader.result);
-            if(action == ControlAction.Hello) {
-                const name = result.split(" ")[1];
-                let newUser = {name: name, fb:new FingerBoard()};
-                this.usersArr.push(newUser);
-                this.doCallback("newMember", newUser);
-                this.wsControl.send(`loha ${this.myName}`);
-
-            } else if(action == ControlAction.Loha) {
-                const name = result.split(" ")[1];
-                if(this.usersArr.filter((element) => element.name == name).length == 0) {
-                    // not int users array, update
-                    let newUser = {name: name, fb:new FingerBoard()};
-                    this.usersArr.push(newUser);
-                    this.doCallback("newMember", newUser);
-                }
-                else {
-                    console.log("User " + name + " already in array!");
-                }
-
-            } else if(action == ControlAction.Data) {
-                // data username,action,stringIndex,note
-                const name = result.split(" ")[1].split(",")[0];
-                this.usersArr.forEach(user => {
-                    if(user.name == name) {
-                        this.doCallback("data", user, result.split(" ")[1]);
-                    }
-                });
-                    
-             } //else if(action == ControlAction.Bye) {
-            //     const byeUser = result.split(" ")[1];
-            //     console.log(`${this.myName} get bye from ${byeUser}`)
-            //     this.usersArr.forEach(user => {
-            //         if(user.name != byeUser) {
-            //             this.doCallback("bye", user);
-            //         }
-            //     });
-            // }
-                
+        if(e.data instanceof ArrayBuffer) {
+            var msg = new ServerMsg(e.data);
+            if(msg.opcode == SessionInfoOp.eEnter) {
+                this.doCallback("enter", [msg.from]);
+            }
+            else if(msg.opcode == SessionInfoOp.eLeave) {
+                this.doCallback("leave", [msg.from]);
+            }
+            else if(msg.opcode == SessionInfoOp.eMsg) {
+                this.doCallback("data", msg.data);
+            }
+            else
+                console.error(`Wrong message format...`);
         }
+        
     }
 
-    public on(event: string, func: (user?: UserInfo, data?: string) => void) {
-        if(event == "newMember") {
-            this.listeningFunction["newMember"].push(func);
+    public on(event: string, func: (data?: Array<string|number>) => void) {
+        if(event == "enter") {
+            this.listeningFunction["enter"].push(func);
         }
         else if(event == "data") {
             this.listeningFunction["data"].push(func);
         }
-        else if(event == "bye") {
-            this.listeningFunction["bye"].push(func);
+        else if(event == "leave") {
+            this.listeningFunction["leave"].push(func);
         }
     }
 
-    private doCallback(event: string, user?: UserInfo, data?: string) {
-        if(event == "newMember" && user != undefined) {
-            this.listeningFunction[event].forEach(func => {
-                func(user);
-            });
-        }
-        else if(event == "data" && data != undefined && user != undefined) {
-            this.listeningFunction[event].forEach(func => {
-                func(user, data);
-            })
-        }
-        else if(event == "bye" && user != undefined) {
-            this.listeningFunction[event].forEach(func => {
-                func(user);
-            });
-        }
-        else {
+    private doCallback(event: string, data?: Array<string|number>) {
+        if(event == "enter") {
             this.listeningFunction[event].forEach(func => {
                 func();
             });
         }
-    }
-
-    // This is for onCtlMessage() to detect message type
-    private detectMsg(msg: string): number {
-        if(msg.split(" ")[0] == "hello") return ControlAction.Hello;
-        else if(msg.split(" ")[0] == "bye") return ControlAction.Bye;
-        else if(msg.split(" ")[0] == "loha") return ControlAction.Loha;
-        else if(msg.split(" ")[0] == "data") return ControlAction.Data;
-        else return -1;
+        else if(event == "data" && data != undefined) {
+            this.listeningFunction[event].forEach(func => {
+                func(data);
+            })
+        }
+        else if(event == "leave") {
+            this.listeningFunction[event].forEach(func => {
+                func();
+            });
+        }
+        else {
+            console.error("No such type of event...");
+        }
     }
 
     public add(ds: DataSource) {
@@ -159,10 +142,4 @@ export class WebSession {
     public get wsGita(): WebSocket {
         return this.wsControl;
     }
-
-    public get users(): Array<UserInfo> {
-        return this.usersArr;
-    }
-
-
 }

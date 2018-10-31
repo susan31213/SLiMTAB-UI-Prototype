@@ -105,27 +105,30 @@ export class FingerBoard {
     //     }
     // }
 
-    public press(stringId: number, note: string): void {        
-        let diff = this.note2num(note) - this.baseToneNumbers[stringId -1];
-        if(diff != 0) {
-            console.log("Press: " + stringId + ", " + note + "(" + ((stringId-1) * (this.config.numOfCoda+1) + diff) + ")");
-            this.pressPointElements.children.item((stringId-1) * (this.config.numOfCoda) + diff -1).setAttribute('class', "fb-p");
-        }
+    public press(index: number): void {
+        let element = this.pressPointElements.children.item(index);
+        if(element != null)  
+            element.setAttribute('class', "fb-p");
     }
 
-    public unpress(stringId: number, note: string): void {
-        let diff = this.note2num(note) - this.baseToneNumbers[stringId -1];
-        if(diff != 0) {
-            console.log("UnPress: " + stringId + ", " + note + "(" + ((stringId-1) * (this.config.numOfCoda+1) + diff) + ")");
-            this.pressPointElements.children.item((stringId-1) * (this.config.numOfCoda) + diff -1).setAttribute('class', "fb-u");
-        }
+    public unpress(index: number): void {
+        let element = this.pressPointElements.children.item(index);
+        if(element != null)  
+            element.setAttribute('class', "fb-u");
     }
 
     public pick(stringId: number): void {
-        console.log("Pick: " + stringId);
         var element: any = this.stringElementsCache[stringId-1].children[2];
         element.beginElement();
     }
+
+    public pressPointIndex(stringId:number, note: string): number {
+        let diff = this.note2num(note) - this.baseToneNumbers[stringId -1];
+        if(diff != 0)
+            return (stringId-1) * (this.config.numOfCoda) + diff -1;
+        else
+            return -1;
+    } 
 
     get domElement(): HTMLObjectElement {
         return this.domElementCache;
@@ -160,5 +163,7 @@ export class FingerBoard {
         }
         else
             return -1;
-    }     
+    }
+
+    
 }
