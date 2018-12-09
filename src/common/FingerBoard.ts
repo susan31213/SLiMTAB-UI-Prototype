@@ -56,8 +56,8 @@ export class FingerBoard {
     {
         this.domElementCache.id = "svg-object";
         this.domElementCache.data = "../renderer/img/fingertab_v3.svg";
-        this.domElementCache.width = "1450px";
-        this.domElementCache.height = "182.288px";
+        this.domElementCache.width = "1280px";
+        this.domElementCache.height = "160px";
 
         let a = this.domElementCache as HTMLObjectElement;
         let self = this;
