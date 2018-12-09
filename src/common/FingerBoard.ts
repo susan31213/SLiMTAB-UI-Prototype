@@ -42,7 +42,7 @@ export class FingerBoard {
 
     constructor(config?: FingerBoardConfig) {
         if(config == undefined) {
-            this.config = {numOfString: 6, numOfCoda: 24, baseTones: ["E4", "B3", "G3", "D3", "A2", "E2"]};
+            this.config = {numOfString: 6, numOfCoda: 21, baseTones: ["E4", "B3", "G3", "D3", "A2", "E2"]};
         } else {
             this.config = config;
         }
@@ -55,7 +55,7 @@ export class FingerBoard {
     public drawFingerTab()
     {
         this.domElementCache.id = "svg-object";
-        this.domElementCache.data = "../../fingertab.svg";
+        this.domElementCache.data = "../renderer/img/fingertab_v3.svg";
         this.domElementCache.width = "1450px";
         this.domElementCache.height = "182.288px";
 
@@ -108,13 +108,13 @@ export class FingerBoard {
     public press(index: number): void {
         let element = this.pressPointElements.children.item(index);
         if(element != null)  
-            element.setAttribute('class', "fb-p");
+            element.setAttribute('opacity', "1");
     }
 
     public unpress(index: number): void {
         let element = this.pressPointElements.children.item(index);
         if(element != null)  
-            element.setAttribute('class', "fb-u");
+            element.setAttribute('opacity', "0");
     }
 
     public pick(stringId: number): void {
