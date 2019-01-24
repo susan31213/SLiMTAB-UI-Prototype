@@ -137,18 +137,7 @@ function init() {
     }
   }
 
-  const dds = new FakeDataSource(fb, "ws://localhost:9002");
-  dds.on("data", (noteInfo: {stringID: number, note: string})=>{
-    fb.press(fb.pressPointIndex(noteInfo.stringID, noteInfo.note));
-    fb.pick(noteInfo.stringID);
-    setTimeout(() => {
-      fb.unpress(fb.pressPointIndex(noteInfo.stringID, noteInfo.note));
-    }, 300);
-  });
-  setInterval(function f() {
-    dds.sendFakeData(6, "B2");
-  }, 500)
-
+  
 }
 
 
@@ -167,6 +156,15 @@ $(document).ready(() => {
   
   var stave = new VF.TabStave(10, 40, 400);
   stave.addClef("tab").setContext(context).draw();
+
+  const dds = new FakeDataSource(fb, "ws://localhost:9002");
+  dds.on("data", (noteInfo: {stringID: number, note: string})=>{
+    fb.press(fb.pressPointIndex(noteInfo.stringID, noteInfo.note));
+    fb.pick(noteInfo.stringID);
+    setTimeout(() => {
+      fb.unpress(fb.pressPointIndex(noteInfo.stringID, noteInfo.note));
+    }, 300);
+  });
 
   // HERE!!!!!!
   const tab = new STabV1Reader(`[
