@@ -167,38 +167,30 @@ $(document).ready(() => {
   });
 
   // HERE!!!!!!
-  const tab = new STabV1Reader(`[
-    [[4, 2, 4, 6, 3, "c"],
-    [4, 2, 4, 6, 3, "c"],
-    [4, 2, 4, 6, 3, "c"],
-    [4, 2, 4, 6, 3, "e"]],
-
-[[1, 0]],
-
-[[2, 0]],
-
-[[4, 0],
-[8, 0],
-    [16, 0],
-    [32, 0]]
-  ]`);
+  const tab = new STabV1Reader(`[[[4,2,4,6,3,"c"],[4,2,4,6,3,"c"],[4,2,4,6,3,"c"],[4,2,4,6,3,"e"]],[[1,0]],[[2,0]],[[4,0],[8,0],[16,0],[32,0]]]`);
   const XD = tab.read();
-  // console.log(XD);
+  console.log(XD);
+  const note_value = ["w", "h", "q", "8", "16", "32"];
   let notes = []
   for(let i=0; i<XD.sections.length; i++) {
     for(let j=0; j<XD.sections[i].notes.length; j++) {
+      const duration = XD.sections[i].notes[j].duration;
       if(XD.sections[i].notes[j] instanceof Note) {
         const positions: Array<{str: number, fret: number}> = [];
         (XD.sections[i].notes[j] as Note).positions.forEach((pos: {stringID: number, fretID: number}) => {
           positions.push({str: pos.stringID, fret: pos.fretID});
         })
-        const duration = "q";
-        notes.push(new VF.TabNote({positions: positions, duration: duration}));
+        
+        notes.push(new VF.TabNote({positions: positions, duration: note_value[Math.floor(Math.log2(duration))]}, true));
+        
+
+      } else {
+        notes.push(new VF.StaveNote({keys: ["b/4"], duration: note_value[Math.floor(Math.log2(duration))]+"r" }));
       }
 
       
     }
+    notes.push(new Vex.Flow.BarNote());
   }
-  console.log(notes);
   VF.Formatter.FormatAndDraw(context, stave, notes);
 });
