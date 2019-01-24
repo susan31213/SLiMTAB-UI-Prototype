@@ -1,9 +1,7 @@
 import { FingerBoard } from '../common/FingerBoard';
 import { WebSession, SessionCommandOp } from '../common/WebSession';
 import { UserDataSource } from '../common/UserDataSource';
-import { DriverDataSource } from '../common/DriverDataSource';
-import * as Vex from 'vexflow';
-
+import { FakeDataSource } from '../common/FakeDataSource';
 var fb: FingerBoard;
 var wb: WebSession;
 var userData: UserDataSource;
@@ -135,55 +133,23 @@ function init() {
     }
   }
 
+  const dds = new FakeDataSource(fb, "ws://localhost:9002");
+  dds.on("data", (noteInfo: {stringID: number, note: string})=>{
+    fb.press(fb.pressPointIndex(noteInfo.stringID, noteInfo.note));
+    setTimeout(() => {
+      fb.unpress(fb.pressPointIndex(noteInfo.stringID, noteInfo.note));
+    }, 300);
+  });
+  setInterval(function f() {
+    dds.sendFakeData(6, "B2");
+  }, 500)
+
 }
 
 
 
 $(document).ready(() => {
   init();
-
-  const VF = Vex.Flow;
   const content = document.getElementById('content') as HTMLElement;
   console.log(content)
-  const renderer = new VF.Renderer(content, VF.Renderer.Backends.SVG);
-  renderer.resize(500, 500);
-  var context = renderer.getContext();
-  context.setFont("Arial", 10).setBackgroundFillStyle("#eed");
-  
-  // Create a tab stave of width 400 at position 10, 40 on the canvas.
-  
-  var stave = new VF.TabStave(10, 40, 400);
-  stave.addClef("tab").setContext(context).draw();
-
-  var notes = [
-    // A single note
-    new VF.TabNote({
-      positions: [{str: 3, fret: 7}],
-      duration: "q"}),
-
-    // A chord with the note on the 3rd string bent
-    new VF.TabNote({
-      positions: [{str: 2, fret: 10},
-                  {str: 3, fret: 9}],
-      duration: "q"}).
-    addModifier(new VF.Bend("Full"), 1),
-
-    // A single note with a harsh vibrato
-    new VF.TabNote({
-      positions: [{str: 2, fret: 5}],
-      duration: "h"}).
-    addModifier(new VF.Vibrato().setHarsh(true).setVibratoWidth(70), 0)
-  ];
-
-  VF.Formatter.FormatAndDraw(context, stave, notes);
-
-  const dds = new DriverDataSource(fb, "ws://localhost:9002");
-  dds.on("data", (note: string)=>{
-    fb.press(fb.pressPointIndex(1, note));
-    fb.pick(1);
-    console.log(note);
-    setTimeout(() => {
-      fb.unpress(fb.pressPointIndex(1, note));
-    }, 1000);
-  });
 });
