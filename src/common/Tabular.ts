@@ -8,32 +8,26 @@ export class Tabular {
 
 export class Section {
     private pnotes: Array<Note> = [];
-    public get notes(): Array<Placeholder>
+    public get notes(): Array<Note | Pause>
     {
         return this.pnotes;
     }
 }
 
-export abstract class Placeholder {
-
-}
-
-export class Note extends Placeholder {
+export class Note {
     public positions: Array<{stringID: number, fretID: number}>;
     public duration: number;
 
     constructor(positions: Array<{stringID: number, fretID: number}>, duration: number) {
-        super();
         this.positions = positions;
         this.duration = duration;
     }
 
 }
 
-export class Pause extends Placeholder {
+export class Pause {
     public duration: number;
     constructor(duration: number) {
-        super();
         this.duration = duration;
     }
 }
