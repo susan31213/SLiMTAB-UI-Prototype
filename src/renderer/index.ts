@@ -194,11 +194,5 @@ $(document).ready(() => {
     }
     notes.push(new Vex.Flow.BarNote());
   }
-<<<<<<< HEAD
-
-
-=======
-  console.log(notes);
->>>>>>> d1f5fdd9d1bb0b9e04d3e8e281446617ee5c8a5c
   VF.Formatter.FormatAndDraw(context, stave, notes);
 });
