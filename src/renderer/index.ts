@@ -2,6 +2,8 @@ import { FingerBoard } from '../common/FingerBoard';
 import { WebSession, SessionCommandOp } from '../common/WebSession';
 import { UserDataSource } from '../common/UserDataSource';
 import { DriverDataSource } from '../common/DriverDataSource';
+import { STabV1Reader } from '../common/STabV1Reader';
+import { Note } from "../common/Tabular";
 import * as Vex from 'vexflow';
 
 var fb: FingerBoard;
@@ -155,27 +157,7 @@ $(document).ready(() => {
   var stave = new VF.TabStave(10, 40, 400);
   stave.addClef("tab").setContext(context).draw();
 
-  var notes = [
-    // A single note
-    new VF.TabNote({
-      positions: [{str: 3, fret: 7}],
-      duration: "q"}),
 
-    // A chord with the note on the 3rd string bent
-    new VF.TabNote({
-      positions: [{str: 2, fret: 10},
-                  {str: 3, fret: 9}],
-      duration: "q"}).
-    addModifier(new VF.Bend("Full"), 1),
-
-    // A single note with a harsh vibrato
-    new VF.TabNote({
-      positions: [{str: 2, fret: 5}],
-      duration: "h"}).
-    addModifier(new VF.Vibrato().setHarsh(true).setVibratoWidth(70), 0)
-  ];
-
-  VF.Formatter.FormatAndDraw(context, stave, notes);
 
   const dds = new DriverDataSource(fb, "ws://localhost:9002");
   dds.on("data", (note: string)=>{
@@ -186,4 +168,40 @@ $(document).ready(() => {
       fb.unpress(fb.pressPointIndex(1, note));
     }, 1000);
   });
+
+  // HERE!!!!!!
+  const tab = new STabV1Reader(`[
+    [[4, 2, 4, 6, 3, "c"],
+    [4, 2, 4, 6, 3, "c"],
+    [4, 2, 4, 6, 3, "c"],
+    [4, 2, 4, 6, 3, "e"]],
+
+[[1, 0]],
+
+[[2, 0]],
+
+[[4, 0],
+[8, 0],
+    [16, 0],
+    [32, 0]]
+  ]`);
+  const XD = tab.read();
+  console.log(XD);
+  let notes = []
+  for(let i=0; i<XD.sections.length; i++) {
+    for(let j=0; j<XD.sections[i].notes.length; j++) {
+      if(XD.sections[i].notes[j] instanceof Note) {
+        const positions: Array<{str: number, fret: number}> = [];
+        (XD.sections[i].notes[j] as Note).positions.forEach((pos: {stringID: number, fretID: number}) => {
+          positions.push({str: pos.stringID, fret: pos.fretID});
+        })
+        const duration = "q";
+        notes.push(new VF.TabNote({positions: positions, duration: duration}));
+      }
+
+      
+    }
+  }
+
+  VF.Formatter.FormatAndDraw(context, stave, notes);
 });
