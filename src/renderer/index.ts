@@ -140,6 +140,7 @@ function init() {
   const dds = new FakeDataSource(fb, "ws://localhost:9002");
   dds.on("data", (noteInfo: {stringID: number, note: string})=>{
     fb.press(fb.pressPointIndex(noteInfo.stringID, noteInfo.note));
+    fb.pick(noteInfo.stringID);
     setTimeout(() => {
       fb.unpress(fb.pressPointIndex(noteInfo.stringID, noteInfo.note));
     }, 300);
@@ -184,7 +185,7 @@ $(document).ready(() => {
     [32, 0]]
   ]`);
   const XD = tab.read();
-  console.log(XD);
+  // console.log(XD);
   let notes = []
   for(let i=0; i<XD.sections.length; i++) {
     for(let j=0; j<XD.sections[i].notes.length; j++) {
@@ -200,6 +201,6 @@ $(document).ready(() => {
       
     }
   }
-
+  console.log(notes);
   VF.Formatter.FormatAndDraw(context, stave, notes);
 });
