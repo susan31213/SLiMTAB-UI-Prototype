@@ -1,6 +1,5 @@
 import { DataSource } from "./DataSource";
 import { FingerBoard } from "./FingerBoard";
-import { WebSession } from './WebSession';
 
 class FunctionArray {
     [index: string]: Array<Function>;
@@ -13,8 +12,8 @@ class FunctionArray {
 
 export class UserDataSource extends DataSource {
     private callbackFuntions: FunctionArray;
-    constructor(fb: FingerBoard, wb:WebSession) {
-        super(fb, wb);
+    constructor(fb: FingerBoard) {
+        super(fb);
         let eventTypes = new Array<string>();
         eventTypes.push("press");
         eventTypes.push("unpress");
@@ -50,9 +49,5 @@ export class UserDataSource extends DataSource {
 
     public get fingerTab(): FingerBoard {
         return this.fb;
-    }
-
-    public get webSession(): WebSession {
-        return this.wb;
     }
 }

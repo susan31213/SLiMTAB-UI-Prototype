@@ -1,6 +1,9 @@
-body {
+html, body {
     overflow-x: hidden;
+    height: 100%;
 }
+
+
 .ui-container{
     display: grid;
     grid-template-rows:  64px 1fr 160px;
@@ -87,8 +90,7 @@ body {
     background: #ffffff;
     /* position: relative; */
     height: auto;
-    width: 100%; 
-    padding-bottom: 56%;
+    width: 100%;
 }
 
 .footer{
