@@ -1,7 +1,7 @@
 import { FingerBoard } from '../common/FingerBoard';
 import { WebSession, SessionCommandOp } from '../common/WebSession';
 import { UserDataSource } from '../common/UserDataSource';
-import { DriverDataSource } from '../common/DriverDataSource';
+import { FakeDataSource } from '../common/FakeDataSource';
 import { STabV1Reader } from '../common/STabV1Reader';
 import { Note } from "../common/Tabular";
 import * as Vex from 'vexflow';
@@ -137,13 +137,24 @@ function init() {
     }
   }
 
+  const dds = new FakeDataSource(fb, "ws://localhost:9002");
+  dds.on("data", (noteInfo: {stringID: number, note: string})=>{
+    fb.press(fb.pressPointIndex(noteInfo.stringID, noteInfo.note));
+    fb.pick(noteInfo.stringID);
+    setTimeout(() => {
+      fb.unpress(fb.pressPointIndex(noteInfo.stringID, noteInfo.note));
+    }, 300);
+  });
+  setInterval(function f() {
+    dds.sendFakeData(6, "B2");
+  }, 500)
+
 }
 
 
 
 $(document).ready(() => {
   init();
-
   const VF = Vex.Flow;
   const content = document.getElementById('content') as HTMLElement;
   console.log(content)
@@ -156,18 +167,6 @@ $(document).ready(() => {
   
   var stave = new VF.TabStave(10, 40, 400);
   stave.addClef("tab").setContext(context).draw();
-
-
-
-  const dds = new DriverDataSource(fb, "ws://localhost:9002");
-  dds.on("data", (note: string)=>{
-    fb.press(fb.pressPointIndex(1, note));
-    fb.pick(1);
-    console.log(note);
-    setTimeout(() => {
-      fb.unpress(fb.pressPointIndex(1, note));
-    }, 1000);
-  });
 
   // HERE!!!!!!
   const tab = new STabV1Reader(`[[[4,2,4,6,3,"c"],[4,2,4,6,3,"c"],[4,2,4,6,3,"c"],[4,2,4,6,3,"e"]],[[1,0]],[[2,0]],[[4,0],[8,0],[16,0],[32,0]]]`);
@@ -195,7 +194,11 @@ $(document).ready(() => {
     }
     notes.push(new Vex.Flow.BarNote());
   }
+<<<<<<< HEAD
 
 
+=======
+  console.log(notes);
+>>>>>>> d1f5fdd9d1bb0b9e04d3e8e281446617ee5c8a5c
   VF.Formatter.FormatAndDraw(context, stave, notes);
 });
