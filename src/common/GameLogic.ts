@@ -1,4 +1,4 @@
-import { Tabular, Note, Pause } from "../common/Tabular";
+import { Tabular, Note, Rest } from "../common/Tabular";
 class NoteLogic extends Note {
     public birthTime: number
     public x: number;
@@ -9,11 +9,11 @@ class NoteLogic extends Note {
     }
 };
   
-class PauseLogic extends Pause {
+class RestLogic extends Rest {
     public birthTime: number
     public x: number;
-    constructor(pause: Pause, birth: number) {
-        super(pause.duration)
+    constructor(rest: Rest, birth: number) {
+        super(rest.duration)
         this.birthTime = birth;
         this.x = 1070;
     }
@@ -23,8 +23,8 @@ export class GameLogic {
     private renderer: TestRenderer;
     private startStamp: number;
     private fps: number;
-    private noteList: Array<NoteLogic | PauseLogic>;
-    private showList: Array<NoteLogic | PauseLogic>;
+    private noteList: Array<NoteLogic | RestLogic>;
+    private showList: Array<NoteLogic | RestLogic>;
     private score: number;
 
     constructor(c: CanvasRenderingContext2D, tab: Tabular, fps: number) {
@@ -32,11 +32,11 @@ export class GameLogic {
         this.renderer.init();
         this.startStamp = -1;
         this.fps = fps;
-        this.noteList = new Array<NoteLogic | PauseLogic>();
-        this.showList = new Array<NoteLogic | PauseLogic>();
+        this.noteList = new Array<NoteLogic | RestLogic>();
+        this.showList = new Array<NoteLogic | RestLogic>();
         this.score = 0;
 
-        // Make note/pause list
+        // Make note/rest list
         let timeCnt = 0;
         for(let i=0; i<tab.sections.length; i++) {
             for(let j=0; j<tab.sections[i].notes.length; j++) {
@@ -45,8 +45,8 @@ export class GameLogic {
             if(tab.sections[i].notes[j] instanceof Note) {
                 n = new NoteLogic(<Note>tab.sections[i].notes[j], timeCnt);
             }
-            else if(tab.sections[i].notes[j] instanceof Pause) {
-            n = new PauseLogic(<Pause>tab.sections[i].notes[j], timeCnt);
+            else if(tab.sections[i].notes[j] instanceof Rest) {
+            n = new RestLogic(<Rest>tab.sections[i].notes[j], timeCnt);
             }
             timeCnt += duration*1000;
             if(n != undefined)
@@ -100,7 +100,7 @@ export class GameLogic {
                 }
                 
             }
-            if(ans instanceof PauseLogic) {
+            if(ans instanceof RestLogic) {
                 this.showList.shift();
                 this.score -= 10;
             }
@@ -127,7 +127,7 @@ class TestRenderer {
       // draw six strings...
     }
   
-    public draw(showList: Array<NoteLogic | PauseLogic>, score: number): void {
+    public draw(showList: Array<NoteLogic | RestLogic>, score: number): void {
 
       this.cxt.clearRect(0,0,(<HTMLCanvasElement>this.cxt.canvas).width,(<HTMLCanvasElement>this.cxt.canvas).height);
       // draw hit area
@@ -142,7 +142,7 @@ class TestRenderer {
         if(element instanceof NoteLogic) {
           this.cxt.fillStyle = "#c82124";
         }
-        else if(element instanceof PauseLogic) {
+        else if(element instanceof RestLogic) {
           this.cxt.fillStyle = "#3370d4";
         }
         this.cxt.beginPath();

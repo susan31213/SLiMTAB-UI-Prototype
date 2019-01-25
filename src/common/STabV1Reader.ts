@@ -1,4 +1,4 @@
-import {Tabular, Section, Pause, Note} from './Tabular';
+import {Tabular, Section, Rest, Note} from './Tabular';
 
 export class STabV1Reader {
     private json: string;
@@ -16,7 +16,7 @@ export class STabV1Reader {
                 const duration = pick[0];
                 const positions: Array<{stringID: number, fretID: number}> = [];
                 if(pick[1] == 0) {
-                    tabsection.notes.push(new Pause(duration));
+                    tabsection.notes.push(new Rest(duration));
                 } else {
                     for(let i=1; i<Math.floor((pick.length-1)/2)*2; i+=2) {
                         positions.push({stringID: pick[i], fretID: pick[i+1]});
