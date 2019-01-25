@@ -1,5 +1,6 @@
 import { DataSource } from "./DataSource";
 import { FingerBoard } from "./FingerBoard";
+import { Note } from "./Tabular";
 
 class FunctionArray {
     [index: string]: Array<Function>;
@@ -30,10 +31,6 @@ export class FakeDataSource extends DataSource {
             this.wsControl.send('set_driver_device 0 4');
             this.wsControl.send('run');
         }
-        let parent = this;
-        setInterval(function f(): void {
-            parent.sendFakeData(6, "B2");
-          }, 500)
     }
 
     public on(ename: string, cbk: (arg: any) => void): void {
@@ -51,9 +48,21 @@ export class FakeDataSource extends DataSource {
         };
     }
 
-    public sendFakeData(stringID: number, note: string): void {
+    // Change: Send Note instead of {stringID, note}
+    private sendFakeData(note: Note): void {
         this.callbackFuntions["data"].forEach(func => {
-            func({stringID, note});
+            func(note);
         });
+    }
+
+    public startSendData(): void {
+        let parent = this;
+        setInterval(function f(): void {
+            const positions: Array<{stringID: number, fretID: number}> = [];
+            positions.push({stringID: 2, fretID: 4});
+            positions.push({stringID: 6, fretID: 3});
+            let note = new Note(positions, 4)
+            parent.sendFakeData(note);
+          }, 1000);
     }
 };

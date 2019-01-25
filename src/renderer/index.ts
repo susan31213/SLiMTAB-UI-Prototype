@@ -4,6 +4,7 @@ import { UserDataSource } from '../common/UserDataSource';
 import { FakeDataSource } from '../common/FakeDataSource';
 import { STabV1Reader } from '../common/STabV1Reader';
 import { Note } from "../common/Tabular";
+import { GameLogic } from "../common/GameLogic";
 import * as Vex from 'vexflow';
 
 var fb: FingerBoard;
@@ -61,7 +62,7 @@ function init() {
     if($('input[name="play type"]:checked').val() == "send")
       userData.do("press", {stringID, note});
     else if($('input[name="play type"]:checked').val() == "receive")
-      fb.press(fb.pressPointIndex(stringID, note));
+      fb.press(fb.namePressPointIndex(stringID, note));
   });
 
   unpressBtn.addEventListener("click", () => {
@@ -70,7 +71,7 @@ function init() {
     if($('input[name="play type"]:checked').val() == "send")
       userData.do("unpress", {stringID, note});
     else if($('input[name="play type"]:checked').val() == "receive")
-      fb.unpress(fb.pressPointIndex(stringID, note));
+      fb.unpress(fb.namePressPointIndex(stringID, note));
   });
 
   pickBtn.addEventListener("click", () => {
@@ -95,7 +96,7 @@ function init() {
     var bytearray = new Uint8Array(3);
     bytearray[0] = SessionCommandOp.eBroadcast;
     bytearray[1] = 0x00;
-    bytearray[2] = fb.pressPointIndex(noteInfo.stringID, noteInfo.note);
+    bytearray[2] = fb.namePressPointIndex(noteInfo.stringID, noteInfo.note);
     wb.wsCtrl.send(bytearray.buffer);
   }
 
@@ -103,7 +104,7 @@ function init() {
     var bytearray = new Uint8Array(3);
     bytearray[0] = SessionCommandOp.eBroadcast;
     bytearray[1] = 0x01;
-    bytearray[2] = fb.pressPointIndex(noteInfo.stringID, noteInfo.note);
+    bytearray[2] = fb.namePressPointIndex(noteInfo.stringID, noteInfo.note);
     wb.wsCtrl.send(bytearray.buffer);
   }
 
@@ -148,7 +149,7 @@ $(document).ready(() => {
   const content = document.getElementById('content') as HTMLElement;
   console.log(content)
   const renderer = new VF.Renderer(content, VF.Renderer.Backends.SVG);
-  renderer.resize(500, 500);
+  renderer.resize(1085, 200);
   var context = renderer.getContext();
   context.setFont("Arial", 10).setBackgroundFillStyle("#eed");
   
@@ -157,27 +158,18 @@ $(document).ready(() => {
   var stave = new VF.TabStave(10, 40, 400);
   stave.addClef("tab").setContext(context).draw();
 
-  const dds = new FakeDataSource(fb, "ws://localhost:9002");
-  dds.on("data", (noteInfo: {stringID: number, note: string})=>{
-    fb.press(fb.pressPointIndex(noteInfo.stringID, noteInfo.note));
-    fb.pick(noteInfo.stringID);
-    setTimeout(() => {
-      fb.unpress(fb.pressPointIndex(noteInfo.stringID, noteInfo.note));
-    }, 300);
-  });
-
-  // HERE!!!!!!
-  const tab = new STabV1Reader(`[[[4,2,4,6,3,"c"],[4,2,4,6,3,"c"],[4,2,4,6,3,"c"],[4,2,4,6,3,"e"]],[[1,0]],[[2,0]],[[4,0],[8,0],[16,0],[32,0]]]`);
-  const XD = tab.read();
-  console.log(XD);
+  // Tabular
+  const testTabular = new STabV1Reader(`[[[4,2,4,6,3,"c"],[4,2,4,6,3,"c"],[4,2,4,6,3,"c"],[4,2,4,6,3,"e"]],[[4,2,4,6,3,"c"],[4,2,4,6,3,"c"],[4,2,4,6,3,"c"],[4,2,4,6,3,"e"]],[[1,0]],[[2,0],[2,0]],[[4,0],[4,0],[4,0],[4,0]],[[8,0],[8,0],[8,0],[8,0]],[[16,0],[16,0],[16,0],[16,0]],[[32,0],[32,0],[32,0],[32,0]]]`);
+  const tab = testTabular.read();
+  console.log(tab);
   const note_value = ["w", "h", "q", "8", "16", "32"];
   let notes = []
-  for(let i=0; i<XD.sections.length; i++) {
-    for(let j=0; j<XD.sections[i].notes.length; j++) {
-      const duration = XD.sections[i].notes[j].duration;
-      if(XD.sections[i].notes[j] instanceof Note) {
+  for(let i=0; i<tab.sections.length; i++) {
+    for(let j=0; j<tab.sections[i].notes.length; j++) {
+      const duration = tab.sections[i].notes[j].duration;
+      if(tab.sections[i].notes[j] instanceof Note) {
         const positions: Array<{str: number, fret: number}> = [];
-        (XD.sections[i].notes[j] as Note).positions.forEach((pos: {stringID: number, fretID: number}) => {
+        (tab.sections[i].notes[j] as Note).positions.forEach((pos: {stringID: number, fretID: number}) => {
           positions.push({str: pos.stringID, fret: pos.fretID});
         })
         
@@ -193,4 +185,35 @@ $(document).ready(() => {
     notes.push(new Vex.Flow.BarNote());
   }
   VF.Formatter.FormatAndDraw(context, stave, notes);
+
+  // FakeDataSource: simulate user input
+  const dds = new FakeDataSource(fb, "ws://localhost:9002");
+  dds.on("data", (note: Note)=>{
+    note.positions.forEach(element => {
+
+      // check hit timing
+      gm.hit(note);
+
+      // render fingerTab
+      fb.press(fb.fretPressPointIndex(element.stringID, element.fretID));
+      fb.pick(element.stringID);
+      setTimeout(() => {
+        fb.unpress(fb.fretPressPointIndex(element.stringID, element.fretID));
+      }, 300);
+    });
+  });
+
+  // GameLogic
+  let canvas = <HTMLCanvasElement>document.createElement("canvas");
+  canvas.width = 1085;
+  content.appendChild(canvas);
+  let cxt = <CanvasRenderingContext2D>canvas.getContext("2d");
+  let gm = new GameLogic(cxt, tab, 20);
+  gm.StartGame();
+  dds.startSendData();
+  
+
 });
+
+
+
