@@ -7,8 +7,8 @@ export class Tabular {
 }
 
 export class Section {
-    private pnotes: Array<Note> = [];
-    public get notes(): Array<Note | Pause>
+    private pnotes: Array<Note|Rest> = [];
+    public get notes(): Array<Note|Rest>
     {
         return this.pnotes;
     }
@@ -25,7 +25,7 @@ export class Note {
 
 }
 
-export class Pause {
+export class Rest {
     public duration: number;
     constructor(duration: number) {
         this.duration = duration;
