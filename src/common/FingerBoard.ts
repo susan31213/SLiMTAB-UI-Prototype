@@ -2,7 +2,6 @@ interface FingerBoardConfig {
     numOfString: number;
     numOfCoda: number;
     baseTones: Array<string>;
-
 }
 
 class Dictionary {
@@ -122,13 +121,17 @@ export class FingerBoard {
         element.beginElement();
     }
 
-    public pressPointIndex(stringId:number, note: string): number {
+    public namePressPointIndex(stringId:number, note: string): number {
         let diff = this.note2num(note) - this.baseToneNumbers[stringId -1];
         if(diff != 0)
             return (stringId-1) * (this.config.numOfCoda) + diff -1;
         else
             return -1;
-    } 
+    }
+
+    public fretPressPointIndex(stringID: number, fretID: number): number {
+        return (stringID-1) * this.config.numOfCoda + fretID - 1;
+    }
 
     get domElement(): HTMLObjectElement {
         return this.domElementCache;
