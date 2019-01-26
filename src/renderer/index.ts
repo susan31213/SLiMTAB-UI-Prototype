@@ -159,7 +159,7 @@ $(document).ready(() => {
   stave.addClef("tab").setContext(context).draw();
 
   // Tabular
-  const testTabular = new STabV1Reader(`[[[4,2,4,6,3,"c"],[4,2,4,6,3,"c"],[4,2,4,6,3,"c"],[4,2,4,6,3,"e"]],[[4,2,4,6,3,"c"],[4,2,4,6,3,"c"],[4,2,4,6,3,"c"],[4,2,4,6,3,"e"]],[[1,0]],[[2,0],[2,0]],[[4,0],[4,0],[4,0],[4,0]],[[8,0],[8,0],[8,0],[8,0]],[[16,0],[16,0],[16,0],[16,0]],[[32,0],[32,0],[32,0],[32,0]]]`);
+  const testTabular = new STabV1Reader(`[[[4,2,4,6,3,"c"],[4,2,4,6,3,"c"],[4,2,4,6,3,"c"],[4,2,4,6,3,"e"]]]`);
   const tab = testTabular.read();
   console.log(tab);
   const note_value = ["w", "h", "q", "8", "16", "32"];
@@ -189,12 +189,12 @@ $(document).ready(() => {
   // FakeDataSource: simulate user input
   const dds = new FakeDataSource(fb, "ws://localhost:9002");
   dds.on("data", (note: Note)=>{
+    
+    // check hit timing
+    gm.Hit(note);
+
+    // render fingerTab
     note.positions.forEach(element => {
-
-      // check hit timing
-      gm.hit(note);
-
-      // render fingerTab
       fb.press(fb.fretPressPointIndex(element.stringID, element.fretID));
       fb.pick(element.stringID);
       setTimeout(() => {
@@ -208,10 +208,27 @@ $(document).ready(() => {
   canvas.width = 1085;
   content.appendChild(canvas);
   let cxt = <CanvasRenderingContext2D>canvas.getContext("2d");
-  let gm = new GameLogic(cxt, tab, 20);
-  gm.StartGame();
-  dds.startSendData();
+  let gm = new GameLogic(fb, cxt, tab, 20);
+  // dds.startSendData(1000);
+
+  /////// Event Listener ///////
+  //Press space to hit...
+  document.addEventListener('keyup', function(event) {
+    if(event.keyCode == 32) {
+      dds.SendData();
+    }
+  });
   
+  // Button: Game Start & Replay
+  let gStart = document.getElementById("gameStart") as HTMLElement;
+  let gReplay = document.getElementById("replay") as HTMLElement;
+  gStart.addEventListener("click", () => {
+    gm.StartGame();
+  });
+
+  gReplay.addEventListener("click", () => {
+    gm.StartReplay();
+  });
 
 });
 

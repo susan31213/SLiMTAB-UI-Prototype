@@ -55,14 +55,18 @@ export class FakeDataSource extends DataSource {
         });
     }
 
-    public startSendData(): void {
+    public startSendData(interval: number): void {
         let parent = this;
         setInterval(function f(): void {
-            const positions: Array<{stringID: number, fretID: number}> = [];
-            positions.push({stringID: 2, fretID: 4});
-            positions.push({stringID: 6, fretID: 3});
-            let note = new Note(positions, 4)
-            parent.sendFakeData(note);
-          }, 1000);
+            parent.SendData();
+          }, interval);
+    }
+
+    public SendData(): void {
+        const positions: Array<{stringID: number, fretID: number}> = [];
+        positions.push({stringID: 2, fretID: 4});
+        positions.push({stringID: 6, fretID: 3});
+        let note = new Note(positions, 4)
+        this.sendFakeData(note);
     }
 };
