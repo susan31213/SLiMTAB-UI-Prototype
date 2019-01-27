@@ -220,15 +220,25 @@ $(document).ready(() => {
   });
   
   // Button: Game Start & Replay
+  let updateRequestID: number;
+
   let gStart = document.getElementById("gameStart") as HTMLElement;
   let gReplay = document.getElementById("replay") as HTMLElement;
   gStart.addEventListener("click", () => {
+    cancelAnimationFrame(updateRequestID);
     gm.StartGame();
+    updateGame();
   });
 
   gReplay.addEventListener("click", () => {
+    cancelAnimationFrame(updateRequestID);
     gm.StartReplay();
+    updateGame();
   });
+
+  function updateGame() {
+    updateRequestID = requestAnimationFrame(() => {gm.Update(); updateGame()});
+  }
 
 });
 

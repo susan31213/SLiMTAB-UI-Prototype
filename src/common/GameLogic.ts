@@ -1,8 +1,6 @@
 import { Tabular, Note, Rest } from "../common/Tabular";
 import { FingerBoard } from "./FingerBoard";
 
-var updateIntervalID: NodeJS.Timer;
-
 class NoteLogic extends Note {
     public birthTime: number
     public x: number;
@@ -34,7 +32,7 @@ export class GameLogic {
     private renderer: TestRenderer;
     private state: GameState;
     private startStamp: number;
-    private fps: number;
+    // private fps: number;
     private tab: Tabular;
     private noteList: Array<NoteLogic | RestLogic>;
     private showList: Array<NoteLogic | RestLogic>;
@@ -47,14 +45,12 @@ export class GameLogic {
         this.state = GameState.end;
         this.renderer.init();
         this.startStamp = -1;
-        this.fps = fps;
+        // this.fps = fps;
         this.tab = tab;
         this.noteList = new Array<NoteLogic | RestLogic>();
         this.showList = new Array<NoteLogic | RestLogic>();
         this.recordList = new Array<NoteLogic | RestLogic>();
         this.score = 0;
-
-        console.log(this.fb.domElement);
     }
 
     private makeNoteList(tab: Tabular) {
@@ -83,25 +79,20 @@ export class GameLogic {
     public StartGame() {
         
         if(this.state == GameState.end) {
-            clearInterval(updateIntervalID); 
             this.state = GameState.playing;
             this.makeNoteList(this.tab);
             this.recordList = [];
             this.startStamp = Date.now();
-            let self = this;
-            updateIntervalID = setInterval(function f() {self.Update()}, self.fps);
+            this.score = 0;
         }
     }
 
     public StartReplay() {
         
         if(this.state == GameState.end) {
-            clearInterval(updateIntervalID);
             this.state = GameState.replaying;
             this.startStamp = Date.now();
             this.makeNoteList(this.tab);
-            let self = this;
-            updateIntervalID = setInterval(function f() {self.Update()}, self.fps);
         }
     }
 
@@ -132,7 +123,6 @@ export class GameLogic {
             this.state = GameState.end;
         }
             
-
         // Draw notes & scores
         this.renderer.draw(this.showList, this.score);
 
