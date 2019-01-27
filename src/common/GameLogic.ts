@@ -38,16 +38,28 @@ enum NoteState {
     die
 };
 
+class FunctionArray {
+    [index: string]: Array<Function>;
+    constructor(eventType: Array<string>) {
+        eventType.forEach(element => {
+            this[element] = new Array<Function>();
+        });
+    }
+}
+
 export class GameLogic {
     private fb: FingerBoard;
     private renderer: TestRenderer;
     private state: GameState;
     private startStamp: number;
-    // private fps: number;
     private tab: Tabular;
     private noteList: Array<NoteLogic | RestLogic>;
-    private recordList: Array<NoteLogic | RestLogic>;
+    private leadNote: number;
+    private resultList: Array<NoteState>;
+    private inputList: Array<NoteLogic | RestLogic>;
     private score: number;
+
+    private callbackFuntions: FunctionArray;
 
     constructor(fb: FingerBoard, c: CanvasRenderingContext2D, tab: Tabular, fps: number) {
         this.fb = fb;
@@ -55,11 +67,28 @@ export class GameLogic {
         this.state = GameState.end;
         this.renderer.init();
         this.startStamp = -1;
-        // this.fps = fps;
         this.tab = tab;
         this.noteList = new Array<NoteLogic | RestLogic>();
-        this.recordList = new Array<NoteLogic | RestLogic>();
+        this.leadNote = -1;
+        this.resultList = new Array<NoteState>();
+        this.inputList = new Array<NoteLogic | RestLogic>();
         this.score = 0;
+
+        let eventTypes = new Array<string>();
+        eventTypes.push("end");
+        this.callbackFuntions = new FunctionArray(eventTypes);
+    }
+
+    public on(ename: string, cbk: (arg: any) => void): void {
+        if(ename=="end") {
+            this.callbackFuntions["end"].push(cbk);
+        }
+    }
+
+    private onGameEnd(): void {
+        this.callbackFuntions["end"].forEach(func => {
+            func();
+        });
     }
 
     private makeNoteList(tab: Tabular) {
@@ -88,9 +117,14 @@ export class GameLogic {
         
         if(this.state == GameState.end) {
             this.state = GameState.playing;
-            this.makeNoteList(this.tab);
-            this.recordList = [];
             this.startStamp = Date.now();
+            this.makeNoteList(this.tab);
+            this.leadNote = -1;
+            this.resultList = [];
+            this.noteList.forEach(() => {
+                this.resultList.push(NoteState.shown);
+            });
+            this.inputList = [];
             this.score = 0;
         }
     }
@@ -101,6 +135,10 @@ export class GameLogic {
             this.state = GameState.replaying;
             this.startStamp = Date.now();
             this.makeNoteList(this.tab);
+            this.leadNote = -1;
+            this.inputList.forEach(element => {
+                element.state = NoteState.hidden;
+            });
             this.score = 0;
         }
     }
@@ -109,20 +147,42 @@ export class GameLogic {
         if(this.state != GameState.end) {
 
             let timer = Date.now() - this.startStamp;
-
-            // spawn notes
+            let noteCnt = 0;
             this.noteList.forEach(n => {
+
+                // find lead note
+                if((this.leadNote == -1 || this.noteList[this.leadNote].state != NoteState.shown) && n.state == NoteState.shown) {
+                    this.leadNote = noteCnt;
+                }
+                
+                // spawn notes
                 if(n.state == NoteState.hidden && n.birthTime <= timer) {
                     n.state = NoteState.shown;
                 }
-            });
-    
-            // remove showing notes
-            this.noteList.forEach(n => {
-                if(n.state == NoteState.shown && n.x < 5) {
+
+                // remove showing notes
+                else if(n.state == NoteState.shown && n.x < 5) {
                     n.state = NoteState.die;
                 }
+
+                noteCnt++;
             });
+
+            // if replaying, apply result
+            if(this.leadNote != -1 && this.state == GameState.replaying && Math.abs(this.noteList[this.leadNote].x - 100) < 30) {
+                this.noteList[this.leadNote].state = this.resultList[this.leadNote];
+                if(this.resultList[this.leadNote] == NoteState.perfect) {
+                    if(this.noteList[this.leadNote] instanceof NoteLogic) {
+                        this.score += 10;
+                    }
+                    else if(this.noteList[this.leadNote] instanceof RestLogic) {
+                        this.score -= 10;
+                    }
+
+                    // ***clear lead note index
+                    this.leadNote = -1;
+                }
+            }
             
             // if no note, end game
             let noNote = true;
@@ -130,7 +190,10 @@ export class GameLogic {
                 if(n.state == NoteState.hidden || n.state == NoteState.shown)
                     noNote = false;
             });
-            this.state = (noNote)? GameState.end : this.state;
+            if(noNote) {
+                this.state = GameState.end;
+                this.onGameEnd();
+            }
                 
             // Draw notes & scores
             this.renderer.draw(this.noteList, this.score);
@@ -142,57 +205,66 @@ export class GameLogic {
     }
 
     private replay(timer: number) {
-        if(this.recordList.length != 0 && this.recordList[0].birthTime <= timer) {
-            let n = this.recordList.shift() as Note;
-            if(n != undefined) {
-                this.Hit(n);
-                n.positions.forEach(element => {
-                    this.fb.press(this.fb.fretPressPointIndex(element.stringID, element.fretID));
-                    this.fb.pick(element.stringID);
-                    setTimeout(() => {
-                        this.fb.unpress(this.fb.fretPressPointIndex(element.stringID, element.fretID));
-                    }, 300);
-                });
+
+        for(let i=0; i<this.inputList.length; i++) {
+            let nl = this.inputList[i];
+            if(nl.state == NoteState.hidden && nl.birthTime <= timer) {
+                nl.state = NoteState.shown;
+                let n = nl as Note;
+                if(n != undefined) {
+                    // this.Hit(n);
+                    n.positions.forEach(element => {
+                        this.fb.press(this.fb.fretPressPointIndex(element.stringID, element.fretID));
+                        this.fb.pick(element.stringID);
+                        setTimeout(() => {
+                            this.fb.unpress(this.fb.fretPressPointIndex(element.stringID, element.fretID));
+                        }, 300);
+                    });
+                }
             }
         }
     }
 
     public Hit(note: Note) {
 
-        if(this.state == GameState.playing || this.state == GameState.replaying) {
+        let ans, i;
+        for(i=0; i<this.noteList.length; i++) {
+            if(this.noteList[i].state == NoteState.shown) {
+                ans = this.noteList[i];
+                break;
+            }
+        }
+
+        if(this.state == GameState.playing) {
 
             // Record
-            if(this.state == GameState.playing)
-                this.recordList.push(new NoteLogic(note, Date.now() - this.startStamp));
+            this.inputList.push(new NoteLogic(note, Date.now() - this.startStamp));
 
             // Detect hit or not, and right or wrong
             let hitPoint = 100;
-            let ans;
-            for(let i=0; i<this.noteList.length; i++) {
-                if(this.noteList[i].state == NoteState.shown) {
-                    ans = this.noteList[i];
-                    break;
-                }
-            }
-
-            if(ans != undefined && Math.abs(hitPoint-ans.x) <= 50) {
+            if(ans != undefined && Math.abs(hitPoint-ans.x) <= 80) {
                 if(ans instanceof NoteLogic && ans.positions.length == note.positions.length) {
                     let flag = true;
-                    for(let i=0; i<note.positions.length; i++) {
-                        if(note.positions[i].stringID != ans.positions[i].stringID || note.positions[i].fretID != ans.positions[i].fretID) {
+                    for(let j=0; j<note.positions.length; j++) {
+                        if(note.positions[j].stringID != ans.positions[j].stringID || note.positions[j].fretID != ans.positions[j].fretID) {
                             flag = false;
                         }
                     }
                     if(flag) {
                         ans.state = NoteState.perfect;
+                        this.resultList[i] = NoteState.perfect;
                         this.score += 10;
                     }
                 }
                 if(ans instanceof RestLogic) {
                     ans.state = NoteState.die;
+                    this.resultList[i] = NoteState.perfect;
                     this.score -= 10;
                 }
             }
+        }
+        else if(this.state == GameState.replaying) {
+            this.noteList[i].state = this.resultList[i];
         }
     }
 
