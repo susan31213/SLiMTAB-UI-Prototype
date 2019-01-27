@@ -108,6 +108,88 @@ export class GameLogic {
     }
 }
 
+const xmlns = "http://www.w3.org/2000/svg";
+
+export class SVGRenderer {
+    private domElementP: SVGSVGElement;
+    private tabularGroup: SVGGElement;
+    private symbolsGroup: SVGGElement;
+    private tabular: Tabular;
+    constructor(config: {width: string, height: string}, tabular: Tabular) {
+        this.tabular = tabular;
+
+        this.domElementP = document.createElementNS(xmlns, "svg");
+        this.domElementP.setAttribute("width", `${config.width}`);
+        this.domElementP.setAttribute("height", `${config.height}`);
+        this.tabularGroup = document.createElementNS(xmlns, "g");
+        this.symbolsGroup = document.createElementNS(xmlns, "g");
+        this.domElementP.appendChild(this.tabularGroup);
+
+        // generate six lines:
+        for(let i=0; i<6; i++) {
+            let line = document.createElementNS(xmlns, "line");
+            line.setAttribute("x1", "0%");
+            line.setAttribute("y1", `${i*10}`);
+            line.setAttribute("x2", "100%");
+            line.setAttribute("y2", `${i*10}`);
+            line.classList.add("string");
+            this.tabularGroup.appendChild(line);
+        }
+
+        this.tabularGroup.setAttribute("style", `transform: translate(0px, 10px) scale(1.2);`);
+
+        let dx = 0;
+        // in percentage
+        let interval = 10;
+        // draw note
+        for(let i=0; i<this.tabular.sections.length; i++) {
+            const section = this.tabular.sections[i];
+            for(let j=0; j<section.notes.length; j++) {
+                
+                const note = section.notes[j];
+
+                if(note instanceof Note) {
+                    for(let k=0; k<note.positions.length; k++) {
+                    
+                        const position = note.positions[k];
+                        const noteg = document.createElementNS(xmlns, "g");
+                        noteg.setAttribute("style", `transform: translate(${dx}vh, ${(position.stringID-1)*10}px)`);
+                        const circle = document.createElementNS(xmlns, "circle");
+                        circle.setAttribute("r", `3`);
+                        circle.classList.add("note-bg-circle");
+
+                        noteg.appendChild(circle);
+
+                        const text = document.createElementNS(xmlns, "text");
+                        text.innerHTML = `${position.fretID}`;
+                        text.setAttribute("alignment-baseline", "central");
+                        text.setAttribute("text-anchor", "middle");
+                        text.classList.add("note-fret");
+                        noteg.appendChild(text);
+                        this.symbolsGroup.appendChild(noteg);
+                    }
+                }
+                dx += interval*1/note.duration;
+
+
+            }
+        }
+        this.tabularGroup.appendChild(this.symbolsGroup);
+        
+    }
+
+    public get domElement(): SVGSVGElement {
+        return this.domElementP;
+    }
+
+    public play(): void {
+        this.symbolsGroup.setAttribute("style", `transform: translate(-100vh, 0); transition: 10s;`);
+    }
+
+    public render(): void {
+    }
+}
+
 class TestRenderer {
     private cxt: CanvasRenderingContext2D;
     private updateInterval: number;    

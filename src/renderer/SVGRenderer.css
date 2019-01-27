@@ -1,0 +1,8 @@
+.string {
+    stroke: black;
+    stroke-width: 2px;
+}
+
+.note-bg-circle {
+    fill: white;
+}

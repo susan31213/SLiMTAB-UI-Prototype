@@ -4,7 +4,7 @@ import { UserDataSource } from '../common/UserDataSource';
 import { FakeDataSource } from '../common/FakeDataSource';
 import { STabV1Reader } from '../common/STabV1Reader';
 import { Note } from "../common/Tabular";
-import { GameLogic } from "../common/GameLogic";
+import { GameLogic, SVGRenderer } from "../common/GameLogic";
 import * as Vex from 'vexflow';
 
 var fb: FingerBoard;
@@ -206,13 +206,13 @@ $(document).ready(() => {
   // GameLogic
   let canvas = <HTMLCanvasElement>document.createElement("canvas");
   canvas.width = 1085;
+  const red = new SVGRenderer({width: "100%", height: "100%"}, tab);
   content.appendChild(canvas);
+  content.appendChild(red.domElement);
   let cxt = <CanvasRenderingContext2D>canvas.getContext("2d");
   let gm = new GameLogic(cxt, tab, 20);
   gm.StartGame();
   dds.startSendData();
-  
-
 });
 
 
