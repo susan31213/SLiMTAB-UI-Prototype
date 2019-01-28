@@ -1,4 +1,6 @@
 import { Tabular, Note, Rest } from "../common/Tabular";
+import { FingerBoard } from "./FingerBoard";
+
 class NoteLogic extends Note {
     public birthTime: number
     public x: number;
@@ -19,24 +21,43 @@ class RestLogic extends Rest {
     }
 };
 
+enum GameState {
+    playing,
+    end,
+    replaying
+};
+
 export class GameLogic {
+    private fb: FingerBoard;
     private renderer: TestRenderer;
+    private state: GameState;
     private startStamp: number;
-    private fps: number;
+    // private fps: number;
+    private tab: Tabular;
     private noteList: Array<NoteLogic | RestLogic>;
     private showList: Array<NoteLogic | RestLogic>;
+    private recordList: Array<NoteLogic | RestLogic>;
     private score: number;
 
-    constructor(c: CanvasRenderingContext2D, tab: Tabular, fps: number) {
+    constructor(fb: FingerBoard, c: CanvasRenderingContext2D, tab: Tabular, fps: number) {
+        this.fb = fb;
         this.renderer = new TestRenderer(c, fps);
+        this.state = GameState.end;
         this.renderer.init();
         this.startStamp = -1;
-        this.fps = fps;
+        // this.fps = fps;
+        this.tab = tab;
         this.noteList = new Array<NoteLogic | RestLogic>();
         this.showList = new Array<NoteLogic | RestLogic>();
+        this.recordList = new Array<NoteLogic | RestLogic>();
         this.score = 0;
+    }
 
-        // Make note/rest list
+    private makeNoteList(tab: Tabular) {
+
+        this.noteList = [];
+        this.showList = [];
+
         let timeCnt = 0;
         for(let i=0; i<tab.sections.length; i++) {
             for(let j=0; j<tab.sections[i].notes.length; j++) {
@@ -56,12 +77,32 @@ export class GameLogic {
     }
 
     public StartGame() {
-        this.startStamp = Date.now();
-        let self = this;
-        setInterval(function f() {self.Update()}, self.fps);
+        
+        if(this.state == GameState.end) {
+            this.state = GameState.playing;
+            this.makeNoteList(this.tab);
+            this.recordList = [];
+            this.startStamp = Date.now();
+            this.score = 0;
+        }
+    }
+
+    public StartReplay() {
+        
+        if(this.state == GameState.end) {
+            this.state = GameState.replaying;
+            this.startStamp = Date.now();
+            this.makeNoteList(this.tab);
+        }
     }
 
     public Update() {
+        if(this.state != GameState.end) {
+            this.play();
+        }
+    }
+
+    private play() {
         let timer = Date.now() - this.startStamp;
         // spawn notes
         if(this.noteList.length != 0 && this.noteList[0].birthTime <= timer) {
@@ -77,32 +118,61 @@ export class GameLogic {
             }
         });
 
+        // if no note, end game
+        if(this.noteList.length == 0 && this.showList.length == 0) {
+            this.state = GameState.end;
+        }
+            
         // Draw notes & scores
         this.renderer.draw(this.showList, this.score);
+
+        // Replay
+        if(this.state == GameState.replaying)
+            this.replay(timer);
     }
 
-    public hit(note: Note) {
-        let hitPoint = 100;
-        let ans = (this.showList.length != 0)? this.showList[0] : undefined;
-        if(ans != undefined)
-            console.log(ans.x);
-        if(ans != undefined && Math.abs(hitPoint-ans.x) <= 50) {
-            if(ans instanceof NoteLogic && ans.positions.length == note.positions.length) {
-                let flag = true;
-                for(let i=0; i<note.positions.length; i++) {
-                    if(note.positions[i].stringID != ans.positions[i].stringID || note.positions[i].fretID != ans.positions[i].fretID) {
-                        flag = false;
+    private replay(timer: number) {
+        if(this.recordList.length != 0 && this.recordList[0].birthTime <= timer) {
+            let n = this.recordList.shift() as Note;
+            if(n != undefined) {
+                n.positions.forEach(element => {
+                    this.fb.press(this.fb.fretPressPointIndex(element.stringID, element.fretID));
+                    this.fb.pick(element.stringID);
+                    setTimeout(() => {
+                        this.fb.unpress(this.fb.fretPressPointIndex(element.stringID, element.fretID));
+                    }, 300);
+                });
+            }
+        }
+    }
+
+    public Hit(note: Note) {
+
+        if(this.state == GameState.playing) {
+
+            // Record
+            this.recordList.push(new NoteLogic(note, Date.now() - this.startStamp));
+
+            // Detect hit or not, and right or wrong
+            let hitPoint = 100;
+            let ans = (this.showList.length != 0)? this.showList[0] : undefined;
+            if(ans != undefined && Math.abs(hitPoint-ans.x) <= 50) {
+                if(ans instanceof NoteLogic && ans.positions.length == note.positions.length) {
+                    let flag = true;
+                    for(let i=0; i<note.positions.length; i++) {
+                        if(note.positions[i].stringID != ans.positions[i].stringID || note.positions[i].fretID != ans.positions[i].fretID) {
+                            flag = false;
+                        }
+                    }
+                    if(flag) {
+                        this.showList.shift();
+                        this.score += 10;
                     }
                 }
-                if(flag) {
+                if(ans instanceof RestLogic) {
                     this.showList.shift();
-                    this.score += 10;
+                    this.score -= 10;
                 }
-                
-            }
-            if(ans instanceof RestLogic) {
-                this.showList.shift();
-                this.score -= 10;
             }
         }
     }
@@ -115,7 +185,7 @@ export class SVGRenderer {
     private tabularGroup: SVGGElement;
     private symbolsGroup: SVGGElement;
     private tabular: Tabular;
-    constructor(config: {width: string, height: string}, tabular: Tabular) {
+    constructor(config: {width: string, height: string, bpm: number}, tabular: Tabular) {
         this.tabular = tabular;
 
         this.domElementP = document.createElementNS(xmlns, "svg");
@@ -155,7 +225,7 @@ export class SVGRenderer {
                         const noteg = document.createElementNS(xmlns, "g");
                         noteg.setAttribute("style", `transform: translate(${dx}vh, ${(position.stringID-1)*10}px)`);
                         const circle = document.createElementNS(xmlns, "circle");
-                        circle.setAttribute("r", `3`);
+                        circle.setAttribute("r", `5`);
                         circle.classList.add("note-bg-circle");
 
                         noteg.appendChild(circle);
