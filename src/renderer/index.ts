@@ -221,7 +221,7 @@ $(document).ready(() => {
   
   // Timer
   let updateRequestID: number;
-  let fps = 120, fpsInterval: number, then: number, elapsed: number, total = 0;
+  let fps = 120, fpsInterval: number, startTime:number, then: number, elapsed: number, total = 0;
   
   // Button: Game Start & Replay
   let gStart = document.getElementById("gameStart") as HTMLElement;
@@ -230,14 +230,14 @@ $(document).ready(() => {
     cancelAnimationFrame(updateRequestID);
     gm.StartGame();
     startTimer();
-    update(elapsed);
+    update();
   });
 
   gReplay.addEventListener("click", () => {
     cancelAnimationFrame(updateRequestID);
     gm.StartReplay();
     startTimer();
-    update(elapsed);
+    update();
   });
 
   gm.on("end", () => {cancelAnimationFrame(updateRequestID); console.log(`Total time: ${total}`)});
@@ -246,18 +246,20 @@ $(document).ready(() => {
     fpsInterval = 1000 / fps;
     total = 0;
     then = Date.now();
+    startTime = then;
   }
 
-  function update(elapsed: number) {
-    updateRequestID = requestAnimationFrame(() => {update(elapsed)});
+  function update() {
+    updateRequestID = requestAnimationFrame(() => {update()});
 
     let now = Date.now();
     elapsed = now - then;
     if (elapsed > fpsInterval) {
       then = now - (elapsed % fpsInterval);
-      total += elapsed;
       gm.Update();
     }
+    
+    total = now - startTime;z
   }
 
 });
