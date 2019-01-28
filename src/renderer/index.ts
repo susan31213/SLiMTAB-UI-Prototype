@@ -160,7 +160,7 @@ $(document).ready(() => {
   stave.addClef("tab").setContext(context).draw();
 
   // Tabular
-  const testTabular = new STabV1Reader(`[[[4,2,4,6,3,"c"],[4,2,4,6,3,"c"],[4,2,4,6,3,"c"],[4,2,4,6,3,"e"]],[[4,0],[4,0],[4,0],[4,0]]]`);
+  const testTabular = new STabV1Reader(`[[[4,2,4,6,3,"c"],[4,2,4,6,3,"c"],[4,2,4,6,3,"c"],[4,2,4,6,3,"e"]],[[4,2,4,6,3,"c"],[4,2,4,6,3,"c"],[4,2,4,6,3,"c"],[4,2,4,6,3,"e"]],[[4,0],[4,0],[4,0],[4,0]]]`);
   const tab = testTabular.read();
   const emptySection = new Section();
   emptySection.notes.push(new Rest(1));
@@ -209,11 +209,11 @@ $(document).ready(() => {
   // GameLogic
   let canvas = <HTMLCanvasElement>document.createElement("canvas");
   canvas.width = 1085;
-  const red = new SVGRenderer({width: "100%", height: "100%", bpm: 120}, tab);
+  const red = new SVGRenderer({width: "100%", height: "100%", bpm: 80}, tab);
   content.appendChild(canvas);
   content.appendChild(red.domElement);
   let cxt = <CanvasRenderingContext2D>canvas.getContext("2d");
-  let gm = new GameLogic(fb, cxt, tab, 20);
+  let gm = new GameLogic(fb, cxt, tab, {fps: 60, bpm:80});
   dds.startSendData(1000);
 
   /////// Event Listener ///////
@@ -226,7 +226,7 @@ $(document).ready(() => {
   
   // Timer
   let updateRequestID: number;
-  let fps = 120, fpsInterval: number, startTime:number, then: number, elapsed: number, total = 0;
+  let fps = 60, fpsInterval: number, startTime:number, then: number, elapsed: number, total = 0;
   
   // Button: Game Start & Replay
   let gStart = document.getElementById("gameStart") as HTMLElement;

@@ -2,7 +2,7 @@ import { Tabular, Note, Rest } from "../common/Tabular";
 import { FingerBoard } from "./FingerBoard";
 
 class NoteLogic extends Note {
-    public birthTime: number;    // change to beat
+    public birthTime: number;    // change to beats
     public x: number;
     public state: number;
     constructor(note: Note, birth: number) {
@@ -63,14 +63,14 @@ export class GameLogic {
 
     private callbackFuntions: FunctionArray;
 
-    constructor(fb: FingerBoard, c: CanvasRenderingContext2D, tab: Tabular, fps: number, bpm: number) {
+    constructor(fb: FingerBoard, c: CanvasRenderingContext2D, tab: Tabular, config: {fps: number, bpm: number}) {
         this.fb = fb;
-        this.renderer = new TestRenderer(c, fps);
+        this.renderer = new TestRenderer(c, config.fps, config.bpm);
         this.state = GameState.end;
         this.renderer.init();
         this.startStamp = -1;
         this.tab = tab;
-        this.bpm = bpm;
+        this.bpm = config.bpm;
         this.noteList = new Array<NoteLogic | RestLogic>();
         this.leadNote = -1;
         this.resultList = new Array<NoteState>();
@@ -80,6 +80,8 @@ export class GameLogic {
         let eventTypes = new Array<string>();
         eventTypes.push("end");
         this.callbackFuntions = new FunctionArray(eventTypes);
+
+        console.log(this.bpm, this.interval);
     }
 
     public on(ename: string, cbk: (arg: any) => void): void {
@@ -98,22 +100,26 @@ export class GameLogic {
 
         this.noteList = [];
 
-        let timeCnt = 0;
+        let beatCnt = -1;
         for(let i=0; i<tab.sections.length; i++) {
             for(let j=0; j<tab.sections[i].notes.length; j++) {
-            const duration = 1/(tab.sections[i].notes[j].duration/4);
+            const beats = 1/(tab.sections[i].notes[j].duration/4);
             let n;
             if(tab.sections[i].notes[j] instanceof Note) {
-                n = new NoteLogic(<Note>tab.sections[i].notes[j], timeCnt);
+                n = new NoteLogic(<Note>tab.sections[i].notes[j], beatCnt);
             }
             else if(tab.sections[i].notes[j] instanceof Rest) {
-            n = new RestLogic(<Rest>tab.sections[i].notes[j], timeCnt);
+            n = new RestLogic(<Rest>tab.sections[i].notes[j], beatCnt);
             }
-            timeCnt += duration*1000;
+            beatCnt += beats;
             if(n != undefined)
                 this.noteList.push(n);
             }
         }
+        this.noteList.forEach(element => {
+            console.log(element.birthTime);
+        });
+        this.noteList[0].x = 100;
     }
 
     public StartGame() {
@@ -159,7 +165,7 @@ export class GameLogic {
                 }
                 
                 // spawn notes
-                if(n.state == NoteState.hidden && n.birthTime <= timer) {
+                if(n.state == NoteState.hidden && n.birthTime*(60/this.bpm*1000) <= timer) {
                     n.state = NoteState.shown;
                 }
 
@@ -211,7 +217,7 @@ export class GameLogic {
 
         for(let i=0; i<this.inputList.length; i++) {
             let nl = this.inputList[i];
-            if(nl.state == NoteState.hidden && nl.birthTime <= timer) {
+            if(nl.state == NoteState.hidden && nl.birthTime*(60/this.bpm) <= timer) {
                 nl.state = NoteState.shown;
                 let n = nl as Note;
                 if(n != undefined) {
@@ -366,10 +372,12 @@ export class SVGRenderer {
 class TestRenderer {
     private cxt: CanvasRenderingContext2D;
     private updateInterval: number;    
+    private bpm: number;
   
-    constructor(c: CanvasRenderingContext2D, updateTime: number) {
+    constructor(c: CanvasRenderingContext2D, fps: number, bpm: number) {
       this.cxt = c;
-      this.updateInterval = updateTime;
+      this.bpm = bpm;
+      this.updateInterval = 1/fps;
     }
   
     public init(): void
@@ -404,7 +412,7 @@ class TestRenderer {
             this.cxt.closePath();
             this.cxt.fill();
     
-            element.x -= 1000/(1000/this.updateInterval);
+            element.x -= (this.bpm/60)*970*this.updateInterval;
         }
         
       });
