@@ -194,7 +194,7 @@ $(document).ready(() => {
   const dds = new FakeDataSource(fb, "ws://localhost:9002");
   dds.on("data", (note: Note)=>{
     // check hit timing
-    gm.Hit(note);
+    gm.Hit(note, total / 1000);
 
     // render fingerTab
     note.positions.forEach(element => {
@@ -214,7 +214,7 @@ $(document).ready(() => {
   content.appendChild(red.domElement);
   let cxt = <CanvasRenderingContext2D>canvas.getContext("2d");
   let gm = new GameLogic(fb, cxt, tab, {fps: 60, bpm:80});
-  dds.startSendData(1000);
+  // dds.startSendData(1000);
 
   /////// Event Listener ///////
   // Press space to hit...

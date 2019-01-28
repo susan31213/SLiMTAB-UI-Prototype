@@ -54,11 +54,9 @@ export class GameLogic {
     private startStamp: number;
     private tab: Tabular;
     private bpm: number;
-    private interval: number = 10;
     private noteList: Array<NoteLogic | RestLogic>;
-    private leadNote: number;
     private resultList: Array<NoteState>;
-    private inputList: Array<NoteLogic | RestLogic>;
+    private inputList: Array<{note: NoteLogic, score: number}>;
     private score: number;
 
     private callbackFuntions: FunctionArray;
@@ -72,16 +70,13 @@ export class GameLogic {
         this.tab = tab;
         this.bpm = config.bpm;
         this.noteList = new Array<NoteLogic | RestLogic>();
-        this.leadNote = -1;
         this.resultList = new Array<NoteState>();
-        this.inputList = new Array<NoteLogic | RestLogic>();
+        this.inputList = new Array<{note: NoteLogic, score: number}>();
         this.score = 0;
 
         let eventTypes = new Array<string>();
         eventTypes.push("end");
         this.callbackFuntions = new FunctionArray(eventTypes);
-
-        console.log(this.bpm, this.interval);
     }
 
     public on(ename: string, cbk: (arg: any) => void): void {
@@ -116,9 +111,6 @@ export class GameLogic {
                 this.noteList.push(n);
             }
         }
-        this.noteList.forEach(element => {
-            console.log(element.birthTime);
-        });
         this.noteList[0].x = 100;
     }
 
@@ -128,7 +120,6 @@ export class GameLogic {
             this.state = GameState.playing;
             this.startStamp = Date.now();
             this.makeNoteList(this.tab);
-            this.leadNote = -1;
             this.resultList = [];
             this.noteList.forEach(() => {
                 this.resultList.push(NoteState.shown);
@@ -144,9 +135,8 @@ export class GameLogic {
             this.state = GameState.replaying;
             this.startStamp = Date.now();
             this.makeNoteList(this.tab);
-            this.leadNote = -1;
             this.inputList.forEach(element => {
-                element.state = NoteState.hidden;
+                element.note.state = NoteState.hidden;
             });
             this.score = 0;
         }
@@ -156,13 +146,7 @@ export class GameLogic {
         if(this.state != GameState.end) {
 
             let timer = Date.now() - this.startStamp;
-            let noteCnt = 0;
             this.noteList.forEach(n => {
-
-                // find lead note
-                if((this.leadNote == -1 || this.noteList[this.leadNote].state != NoteState.shown) && n.state == NoteState.shown) {
-                    this.leadNote = noteCnt;
-                }
                 
                 // spawn notes
                 if(n.state == NoteState.hidden && n.birthTime*(60/this.bpm*1000) <= timer) {
@@ -173,25 +157,7 @@ export class GameLogic {
                 else if(n.state == NoteState.shown && n.x < 5) {
                     n.state = NoteState.die;
                 }
-
-                noteCnt++;
             });
-
-            // if replaying, apply result
-            if(this.leadNote != -1 && this.state == GameState.replaying && Math.abs(this.noteList[this.leadNote].x - 100) < 30) {
-                this.noteList[this.leadNote].state = this.resultList[this.leadNote];
-                if(this.resultList[this.leadNote] == NoteState.perfect) {
-                    if(this.noteList[this.leadNote] instanceof NoteLogic) {
-                        this.score += 10;
-                    }
-                    else if(this.noteList[this.leadNote] instanceof RestLogic) {
-                        this.score -= 10;
-                    }
-
-                    // ***clear lead note index
-                    this.leadNote = -1;
-                }
-            }
             
             // if no note, end game
             let noNote = true;
@@ -217,11 +183,11 @@ export class GameLogic {
 
         for(let i=0; i<this.inputList.length; i++) {
             let nl = this.inputList[i];
-            if(nl.state == NoteState.hidden && nl.birthTime*(60/this.bpm) <= timer) {
-                nl.state = NoteState.shown;
-                let n = nl as Note;
+            if(nl.note.state == NoteState.hidden && nl.note.birthTime*(60/this.bpm*1000) <= timer) {
+                nl.note.state = NoteState.shown;
+                this.score += this.inputList[i].score;
+                let n = nl.note as Note;
                 if(n != undefined) {
-                    // this.Hit(n);
                     n.positions.forEach(element => {
                         this.fb.press(this.fb.fretPressPointIndex(element.stringID, element.fretID));
                         this.fb.pick(element.stringID);
@@ -234,8 +200,23 @@ export class GameLogic {
         }
     }
 
-    public Hit(note: Note) {
+    private foundBound(beat:number, u: number, l: number): number {
+        while(l+1 != u) {
+            const mid = Math.floor((u+l)/2);
+            if(this.noteList[mid].birthTime / (this.noteList[mid].duration/4) > beat) {
+                u = mid;
+            }
+            else if(this.noteList[mid].birthTime / (this.noteList[mid].duration/4) < beat) {
+                l = mid;
+            }
+            else {
+                return mid;
+            }
+        }
+        return l;
+    }
 
+    public Hit(note: Note, seconds: number) {
         let ans, i;
         for(i=0; i<this.noteList.length; i++) {
             if(this.noteList[i].state == NoteState.shown) {
@@ -246,31 +227,62 @@ export class GameLogic {
 
         if(this.state == GameState.playing) {
 
-            // Record
-            this.inputList.push(new NoteLogic(note, Date.now() - this.startStamp));
+            
+            // variable of hit timing & +-score
+            let n = new NoteLogic(note, seconds * (this.bpm / 60));
+            let s = 0;
+            
 
+            let right = false;
             // Detect hit or not, and right or wrong
-            let hitPoint = 100;
-            if(ans != undefined && Math.abs(hitPoint-ans.x) <= 80) {
-                if(ans instanceof NoteLogic && ans.positions.length == note.positions.length) {
-                    let flag = true;
-                    for(let j=0; j<note.positions.length; j++) {
-                        if(note.positions[j].stringID != ans.positions[j].stringID || note.positions[j].fretID != ans.positions[j].fretID) {
-                            flag = false;
-                        }
+            if(ans instanceof NoteLogic && ans.positions.length == note.positions.length) {
+                right = true;
+                for(let j=0; j<note.positions.length; j++) {
+                    if(note.positions[j].stringID != ans.positions[j].stringID || note.positions[j].fretID != ans.positions[j].fretID) {
+                        right = false;
                     }
-                    if(flag) {
-                        ans.state = NoteState.perfect;
-                        this.resultList[i] = NoteState.perfect;
-                        this.score += 10;
-                    }
-                }
-                if(ans instanceof RestLogic) {
-                    ans.state = NoteState.die;
-                    this.resultList[i] = NoteState.perfect;
-                    this.score -= 10;
                 }
             }
+
+            if(right) {
+                const beats = seconds * this.bpm / 60 -1;
+                let upper = this.noteList.length-1, lower = 0;
+
+                const upperNote = this.noteList[upper];
+                if(upperNote.birthTime / (upperNote.duration/4) < beats) {
+                    if(Math.abs(upperNote.birthTime / (upperNote.duration/4)) < 0.5) {
+                        if(upperNote instanceof Note) {
+                            this.score += 10;
+                        }
+                    }
+                }
+                else {
+                    const idx = this.foundBound(beats, upper, lower);
+                    const lowNote = this.noteList[idx], upNote = this.noteList[idx+1];
+                    if(beats - lowNote.birthTime / (upperNote.duration/4) < upNote.birthTime / (upperNote.duration/4) - beats) {
+                        console.log("close lower bound");
+                        if(Math.abs(beats - lowNote.birthTime / (lowNote.duration/4)) < 0.0625 && lowNote instanceof Note) {
+                            s = 10;
+                            this.resultList[i] = NoteState.perfect;
+                        }
+                    }
+                    else {
+                        console.log("close upper bound");
+                        if(Math.abs(upNote.birthTime / (upNote.duration/4) - beats) < 0.1 && upNote instanceof Note) {
+                            s = 10;
+                            this.resultList[i] = NoteState.perfect;
+                        }
+                    }
+                }
+            }
+
+            if(this.resultList[i] != NoteState.perfect)
+                s = -1;
+            this.score += s;
+
+            // Recored hit info
+            this.inputList.push({note: n, score: s});
+
         }
         else if(this.state == GameState.replaying) {
             this.noteList[i].state = this.resultList[i];
@@ -364,7 +376,7 @@ export class SVGRenderer {
 
     public setTime(seconds: number): void {
         const beats = seconds * this.bpm / 60;
-        console.log(Math.floor(beats));
+        // console.log(Math.floor(beats));
         this.symbolsGroup.setAttribute("style", `transform: translate(${-beats/4*this.interval}vw, 0);`);
     }
 }
