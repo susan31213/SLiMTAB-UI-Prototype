@@ -2,7 +2,7 @@ import { Tabular, Note, Rest } from "../common/Tabular";
 import { FingerBoard } from "./FingerBoard";
 
 class NoteLogic extends Note {
-    public birthTime: number
+    public birthTime: number;    // change to beat
     public x: number;
     public state: number;
     constructor(note: Note, birth: number) {
@@ -53,6 +53,8 @@ export class GameLogic {
     private state: GameState;
     private startStamp: number;
     private tab: Tabular;
+    private bpm: number;
+    private interval: number = 10;
     private noteList: Array<NoteLogic | RestLogic>;
     private leadNote: number;
     private resultList: Array<NoteState>;
@@ -61,13 +63,14 @@ export class GameLogic {
 
     private callbackFuntions: FunctionArray;
 
-    constructor(fb: FingerBoard, c: CanvasRenderingContext2D, tab: Tabular, fps: number) {
+    constructor(fb: FingerBoard, c: CanvasRenderingContext2D, tab: Tabular, fps: number, bpm: number) {
         this.fb = fb;
         this.renderer = new TestRenderer(c, fps);
         this.state = GameState.end;
         this.renderer.init();
         this.startStamp = -1;
         this.tab = tab;
+        this.bpm = bpm;
         this.noteList = new Array<NoteLogic | RestLogic>();
         this.leadNote = -1;
         this.resultList = new Array<NoteState>();
