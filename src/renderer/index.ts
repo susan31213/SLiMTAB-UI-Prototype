@@ -3,7 +3,7 @@ import { WebSession, SessionCommandOp } from '../common/WebSession';
 import { UserDataSource } from '../common/UserDataSource';
 import { FakeDataSource } from '../common/FakeDataSource';
 import { STabV1Reader } from '../common/STabV1Reader';
-import { Note } from "../common/Tabular";
+import { Note, Section, Rest } from "../common/Tabular";
 import { GameLogic, GameState, SVGRenderer } from "../common/GameLogic";
 
 import * as Vex from 'vexflow';
@@ -162,6 +162,9 @@ $(document).ready(() => {
   // Tabular
   const testTabular = new STabV1Reader(`[[[4,2,4,6,3,"c"],[4,2,4,6,3,"c"],[4,2,4,6,3,"c"],[4,2,4,6,3,"e"]],[[4,0],[4,0],[4,0],[4,0]]]`);
   const tab = testTabular.read();
+  const emptySection = new Section();
+  emptySection.notes.push(new Rest(1));
+  tab.sections.splice(0, 0, emptySection);
   console.log(tab);
   const note_value = ["w", "h", "q", "8", "16", "32"];
   let notes = []
