@@ -284,7 +284,7 @@ export class SVGRenderer {
     private symbolsGroup: SVGGElement;
     private tabular: Tabular;
     private bpm: number;
-    private tabDuration: number;
+    //private tabDuration: number;
     private interval: number = 10;
     constructor(config: {width: string, height: string, bpm: number}, tabular: Tabular) {
         this.bpm = config.bpm;
@@ -308,7 +308,7 @@ export class SVGRenderer {
             this.tabularGroup.appendChild(line);
         }
 
-        this.tabularGroup.setAttribute("style", `transform: translate(0px, 10px) scale(1.2);`);
+        this.tabularGroup.setAttribute("style", `transform: translate(0px, 10px) scale(1);`);
 
         let dx = 0;
         // draw note
@@ -323,7 +323,7 @@ export class SVGRenderer {
                     
                         const position = note.positions[k];
                         const noteg = document.createElementNS(xmlns, "g");
-                        noteg.setAttribute("style", `transform: translate(${dx}vh, ${(position.stringID-1)*10}px)`);
+                        noteg.setAttribute("style", `transform: translate(${dx}vw, ${(position.stringID-1)*10}px)`);
                         const circle = document.createElementNS(xmlns, "circle");
                         circle.setAttribute("r", `5`);
                         circle.classList.add("note-bg-circle");
@@ -345,7 +345,7 @@ export class SVGRenderer {
         this.tabularGroup.appendChild(this.symbolsGroup);
         // beats
         // TODO: remove this hard coded "4"
-        this.tabDuration = dx / this.interval * 4;
+        //this.tabDuration = dx / this.interval * 4;
     }
 
     public get domElement(): SVGSVGElement {
@@ -353,13 +353,13 @@ export class SVGRenderer {
     }
 
     public play(): void {
-        this.symbolsGroup.setAttribute("style", `transform: translate(-100vh, 0); transition: 10s;`);
+        this.symbolsGroup.setAttribute("style", `transform: translate(-100vw, 0); transition: 10s;`);
     }
 
     public setTime(seconds: number): void {
-        console.log(seconds);
         const beats = seconds * this.bpm / 60;
-        this.symbolsGroup.setAttribute("style", `transform: translate(${-beats/this.tabDuration*this.interval}vh, 0);`);
+        console.log(Math.floor(beats));
+        this.symbolsGroup.setAttribute("style", `transform: translate(${-beats/4*this.interval}vw, 0);`);
     }
 }
 
