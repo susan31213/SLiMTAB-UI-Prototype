@@ -4,7 +4,8 @@ import { UserDataSource } from '../common/UserDataSource';
 import { FakeDataSource } from '../common/FakeDataSource';
 import { STabV1Reader } from '../common/STabV1Reader';
 import { Note } from "../common/Tabular";
-import { GameLogic, SVGRenderer } from "../common/GameLogic";
+import { GameLogic, GameState, SVGRenderer } from "../common/GameLogic";
+
 import * as Vex from 'vexflow';
 
 var fb: FingerBoard;
@@ -159,7 +160,7 @@ $(document).ready(() => {
   stave.addClef("tab").setContext(context).draw();
 
   // Tabular
-  const testTabular = new STabV1Reader(`[[[4,2,4,6,3,"c"],[4,2,4,6,3,"c"],[4,2,4,6,3,"c"],[4,2,4,6,3,"e"]]]`);
+  const testTabular = new STabV1Reader(`[[[4,2,4,6,3,"c"],[4,2,4,6,3,"c"],[4,2,4,6,3,"c"],[4,2,4,6,3,"e"]],[[4,0],[4,0],[4,0],[4,0]]]`);
   const tab = testTabular.read();
   console.log(tab);
   const note_value = ["w", "h", "q", "8", "16", "32"];
@@ -213,37 +214,60 @@ $(document).ready(() => {
   dds.startSendData(1000);
 
   /////// Event Listener ///////
-  //Press space to hit...
+  // Press space to hit...
   document.addEventListener('keyup', function(event) {
-    if(event.keyCode == 32) {
+    if(gm.nowState == GameState.playing && event.keyCode == 32) {   // only hit when game playing...
       dds.SendData();
     }
   });
   
-  // Button: Game Start & Replay
+  // Timer
   let updateRequestID: number;
-
+  let fps = 120, fpsInterval: number, then: number, elapsed: number, total = 0;
+  
+  // Button: Game Start & Replay
   let gStart = document.getElementById("gameStart") as HTMLElement;
   let gReplay = document.getElementById("replay") as HTMLElement;
   gStart.addEventListener("click", () => {
     cancelAnimationFrame(updateRequestID);
     gm.StartGame();
-    updateGame();
+    startTimer();
+    update(elapsed);
   });
 
   gReplay.addEventListener("click", () => {
     cancelAnimationFrame(updateRequestID);
     gm.StartReplay();
-    updateGame();
+    startTimer();
+    update(elapsed);
   });
 
-  function updateGame() {
-    updateRequestID = requestAnimationFrame(() => {
-      gm.Update();
-      
+  gm.on("end", () => {
+    cancelAnimationFrame(updateRequestID);
+    red.setTime(0);
+    console.log(`Total time: ${total}`);
+  });
 
-      updateGame();
+  function startTimer() {
+    fpsInterval = 1000 / fps;
+    total = 0;
+    then = Date.now();
+  }
+
+  function update(elapsed: number) {
+    updateRequestID = requestAnimationFrame(() => {
+      update(elapsed);
     });
+
+    let now = Date.now();
+    elapsed = now - then;
+    if (elapsed > fpsInterval) {
+      then = now - (elapsed % fpsInterval);
+      total += elapsed;
+      gm.Update();
+      if(gm.nowState == GameState.playing)
+        red.setTime(total / 1000.0);
+    }
   }
 
 });
