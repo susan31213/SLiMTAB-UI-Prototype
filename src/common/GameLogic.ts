@@ -140,6 +140,7 @@ export class GameLogic {
         if(this.state == GameState.end) {
             this.state = GameState.playing;
             this.startStamp = Date.now();
+            this.checkIndex = 0;
             this.makeNoteList(this.tab);
             this.resultList = [];
             this.noteList.forEach(() => {
@@ -155,7 +156,7 @@ export class GameLogic {
         if(this.state == GameState.end) {
             this.state = GameState.replaying;
             this.startStamp = Date.now();
-
+            this.checkIndex = 0;
             this.makeNoteList(this.tab);
             this.inputList.forEach(element => {
                 element.note.state = NoteState.hidden;
@@ -190,12 +191,13 @@ export class GameLogic {
             if(beats - (n.birthTime+1) > this.range) {
                 if(n instanceof Note) {
                     if(this.state == GameState.playing) {
+                        this.resultList[this.checkIndex] = 0;
                         n.corrects.forEach(element => {
                             if(element) {
                                 this.resultList[this.checkIndex]++;
                             }
                         });
-                    }                       
+                    }
 
                     if(this.resultList[this.checkIndex] == n.positions.length) {
                         // TODO: call notify(index, "perfect");
@@ -281,15 +283,14 @@ export class GameLogic {
         let n = new NoteLogic(new Note(positions, 4), seconds * (this.bpm / 60));
         let s = 0;
 
-        let target;
+        let target: NoteLogic | RestLogic;
         let upper = this.noteList.length-1, lower = 0;
         const firstNote = this.noteList[0];
         const lastNote = this.noteList[upper];
         
         // check hit before first note
         if(firstNote.birthTime+1 > beats) {
-            target = lastNote;
-            if(check()) {
+            if(this.check(firstNote, beats, note)) {
                 correct = true;
                 // TODO: call notify(0, "perfect")
             }
@@ -297,8 +298,7 @@ export class GameLogic {
 
         // check hit after last note
         else if(lastNote.birthTime+1 < beats) {
-            target = lastNote;
-            if(check()) {
+            if(this.check(lastNote, beats, note)) {
                 correct = true;
                 // TODO: call notify(upper, "perfect")
             }
@@ -316,7 +316,7 @@ export class GameLogic {
                 console.log("close upper bound");
                 target = upNote;
             }
-            if(check()) {
+            if(this.check(target, beats, note)) {
                 correct = true;
             }
         }
@@ -327,27 +327,27 @@ export class GameLogic {
 
         // Recored hit info
         this.inputList.push({note: n, score: s});
+    }
 
-        // check this hit correteness
-        function check(): boolean {
-            let include = false;
+    // check this hit correteness
+    private check(ans: NoteLogic | RestLogic, beats: number, note:{stringID: number, fretID: number}): boolean {
+        let include = false;
 
-            // hit timing & is it note?
-            if(Math.abs((target.birthTime + 1) - beats) >= this.range|| target instanceof Rest)
-                return false;
+        // hit timing & is it note?
+        if(Math.abs((ans.birthTime + 1) - beats) >= this.range || ans instanceof Rest)
+            return false;
 
-            // hit right string & fret?
-            if(target instanceof NoteLogic) {
-                for(let j=0; j<target.positions.length; j++) {
-                    if(target.positions[j].stringID == note.stringID && target.positions[j].fretID == note.fretID) {
-                        include = true;
-                        target.corrects[j] = true;
-                        break;
-                    }
+        // hit right string & fret?
+        if(ans instanceof NoteLogic) {
+            for(let j=0; j<ans.positions.length; j++) {
+                if(ans.positions[j].stringID == note.stringID && ans.positions[j].fretID == note.fretID) {
+                    include = true;
+                    ans.corrects[j] = true;
+                    break;
                 }
             }
-            return include;
         }
+        return include;
     }
 
     public get nowState(): GameState {
