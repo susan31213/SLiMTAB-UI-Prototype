@@ -62,6 +62,6 @@ export class FakeDataSource extends DataSource {
     }
 
     public SendData(): void {
-        this.sendFakeData({stringID: 2, fretID: 4});
+        this.sendFakeData({stringID: 1, fretID: 0});
     }
 };
