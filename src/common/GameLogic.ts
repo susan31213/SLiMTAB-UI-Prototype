@@ -63,7 +63,7 @@ export class GameLogic {
     private range: number;
     private noteList: Array<NoteLogic | RestLogic>;
     private checkIndex: number;
-    private resultList: Array<NoteState>;
+    private resultList: Array<number>;
     private inputList: Array<{note: NoteLogic, score: number}>;
     private score: number;
 
@@ -80,7 +80,7 @@ export class GameLogic {
         this.range = 4/config.range;
         this.noteList = new Array<NoteLogic | RestLogic>();
         this.checkIndex = 0;
-        this.resultList = new Array<NoteState>();
+        this.resultList = new Array<number>();
         this.inputList = new Array<{note: NoteLogic, score: number}>();
         this.score = 0;
         
@@ -143,7 +143,7 @@ export class GameLogic {
             this.makeNoteList(this.tab);
             this.resultList = [];
             this.noteList.forEach(() => {
-                this.resultList.push(NoteState.shown);
+                this.resultList.push(0);
             });
             this.inputList = [];
             this.score = 0;
@@ -155,6 +155,7 @@ export class GameLogic {
         if(this.state == GameState.end) {
             this.state = GameState.replaying;
             this.startStamp = Date.now();
+
             this.makeNoteList(this.tab);
             this.inputList.forEach(element => {
                 element.note.state = NoteState.hidden;
@@ -184,36 +185,33 @@ export class GameLogic {
             this.renderer.draw(this.noteList, this.score);
 
             // find unchecked note, check correctness
-            if(this.state == GameState.playing) {
-                const beats = timer/1000 * this.bpm / 60;
-                const n = this.noteList[this.checkIndex];
-                
-                if(beats - (n.birthTime+1) > this.range) {
-
-                    if(n instanceof Note) {
-                        let correct = 0;
+            const beats = timer/1000 * this.bpm / 60;
+            const n = this.noteList[this.checkIndex];
+            if(beats - (n.birthTime+1) > this.range) {
+                if(n instanceof Note) {
+                    if(this.state == GameState.playing) {
                         n.corrects.forEach(element => {
                             if(element) {
-                                correct++;
+                                this.resultList[this.checkIndex]++;
                             }
                         });
+                    }                       
 
-                        if(correct == n.positions.length) {
-                            // TODO: call notify(index, "perfect");
-                            //
-                            console.log("perfect");
-                        }
-                        else if(correct != 0) {
-                            // TODO: call notify(index, "good");
-                            //
-                            console.log("good");
-                        }
+                    if(this.resultList[this.checkIndex] == n.positions.length) {
+                        // TODO: call notify(index, "perfect");
+                        //
+                        console.log("perfect");
                     }
-                    
-                    this.checkIndex++;
-                    if(this.checkIndex == this.noteList.length)
-                        this.checkIndex -= 1;
+                    else if(this.resultList[this.checkIndex] != 0) {
+                        // TODO: call notify(index, "good");
+                        //
+                        console.log("good");
+                    }
                 }
+                
+                this.checkIndex++;
+                if(this.checkIndex == this.noteList.length)
+                    this.checkIndex -= 1;
             }
 
             // Replay
