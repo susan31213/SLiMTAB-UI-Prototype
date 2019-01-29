@@ -97,24 +97,34 @@ export class GameLogic {
     private makeNoteList(tab: Tabular) {
 
         this.noteList = [];
-
-        let beatCnt = -1;
+        let tmp = [];
+        let beatCnt = 0;
+        
+        // flat notes
         for(let i=0; i<tab.sections.length; i++) {
             for(let j=0; j<tab.sections[i].notes.length; j++) {
-            const beats = 1/(tab.sections[i].notes[j].duration/4);
-            let n;
-            if(tab.sections[i].notes[j] instanceof Note) {
-                n = new NoteLogic(<Note>tab.sections[i].notes[j], beatCnt);
-            }
-            else if(tab.sections[i].notes[j] instanceof Rest) {
-            n = new RestLogic(<Rest>tab.sections[i].notes[j], beatCnt);
-            }
-            beatCnt += beats;
-            if(n != undefined)
-                this.noteList.push(n);
+                tmp.push(tab.sections[i].notes[j]);
             }
         }
-        this.noteList[0].x = 100;
+
+        // no first beat...
+        tmp[0].duration = 4/3;
+
+        for(let k=0; k<tmp.length; k++) {
+            const beats = 1/(tmp[k].duration/4);
+            let n;
+            if(tmp[k] instanceof Note) {
+                n = new NoteLogic(<Note>tmp[k], beatCnt);
+            }
+            else if(tmp[k] instanceof Rest) {
+                n = new RestLogic(<Rest>tmp[k], beatCnt);
+            }
+            if(n != undefined)
+                this.noteList.push(n);
+            beatCnt += beats;
+        }
+
+        this.noteList.shift();
     }
 
     public StartGame() {
@@ -206,10 +216,10 @@ export class GameLogic {
     private findBound(beat:number, u: number, l: number): number {
         while(l+1 != u) {
             const mid = Math.floor((u+l)/2);
-            if(this.noteList[mid].birthTime / (this.noteList[mid].duration/4) > beat) {
+            if(this.noteList[mid].birthTime + 1/(this.noteList[mid].duration/4) > beat) {
                 u = mid;
             }
-            else if(this.noteList[mid].birthTime / (this.noteList[mid].duration/4) < beat) {
+            else if(this.noteList[mid].birthTime + 1/(this.noteList[mid].duration/4) < beat) {
                 l = mid;
             }
             else {
@@ -221,8 +231,8 @@ export class GameLogic {
 
     public Hit(note: {stringID: number, fretID: number}, seconds: number) {
 
-        const beats = seconds * this.bpm / 60 -1;
-        let targetIndex = -1;
+        const beats = seconds * this.bpm / 60;
+        let correct = false;
 
         // variable of hit timing & +-score
         const positions: Array<{stringID: number, fretID: number}> = [];
@@ -235,21 +245,19 @@ export class GameLogic {
         const lastNote = this.noteList[upper];
         
         // check hit before first note
-        if(firstNote.birthTime / (firstNote.duration/4) > beats) {
+        if(firstNote.birthTime+1 > beats) {
             if(check(firstNote)) {
                 s = 10;
-                this.resultList[0] = NoteState.perfect;
-                targetIndex = 0;
+                correct = true;
                 // TODO: call notify(0, "perfect")
             }
         }
 
         // check hit after last note
-        else if(lastNote.birthTime / (lastNote.duration/4) < beats) {
+        else if(lastNote.birthTime+1 < beats) {
             if(check(lastNote)) {
                 s = 10;
-                this.resultList[upper] = NoteState.perfect;
-                targetIndex = upper;
+                correct = true;
                 // TODO: call notify(upper, "perfect")
             }
         }
@@ -259,35 +267,35 @@ export class GameLogic {
             let lowIdx = this.findBound(beats, upper, lower);
             const lowNote = this.noteList[lowIdx], upNote = this.noteList[lowIdx+1];
             let targetNote;
-            if(beats - lowNote.birthTime / (lastNote.duration/4) < upNote.birthTime / (lastNote.duration/4) - beats) {
+            if(beats - (lowNote.birthTime + 1) < (upNote.birthTime + 1) - beats) {
                 console.log("close lower bound");
                 targetNote = lowNote;
-                targetIndex = lowIdx;
             }
             else {
                 console.log("close upper bound");
                 targetNote = upNote;
-                targetIndex = lowIdx + 1;
             }
             if(check(targetNote)) {
                 s = 10;
-                this.resultList[targetIndex] = NoteState.perfect;
+                correct = true;
             }
         }
 
-        if(targetIndex == -1 || (this.resultList[targetIndex] != NoteState.perfect))
+        if(!correct)
             s = -1;
         this.score += s;
 
         // Recored hit info
         this.inputList.push({note: n, score: s});
 
-        // check this hit correctness
+        // check this hit correteness
         function check(ans: NoteLogic | RestLogic): boolean {
             let include = false;
 
             // hit timing & is it note?
-            if(Math.abs(ans.birthTime / (ans.duration/4) - beats) >= 0.0625 || ans instanceof Rest)
+            console.log(`beats: ${beats}`);
+            console.log(ans.birthTime + 1);
+            if(Math.abs((ans.birthTime + 1) - beats) >= 0.065|| ans instanceof Rest)
                 return false;
 
             // hit right string & fret?
@@ -428,7 +436,6 @@ class TestRenderer {
       this.cxt.beginPath();
       this.cxt.arc(100, 100, 20, 0, 2 * Math.PI);
       this.cxt.stroke();
-      
       showList.forEach(element => {
         // draw
         if(element.state == NoteState.shown) {
