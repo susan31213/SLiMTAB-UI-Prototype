@@ -1,7 +1,7 @@
 import { FingerBoard } from '../common/FingerBoard';
 import { WebSession, SessionCommandOp } from '../common/WebSession';
 import { UserDataSource } from '../common/UserDataSource';
-import { FakeDataSource } from '../common/FakeDataSource';
+import { DriverDataSource } from '../common/DriverDataSource';
 import { STabV1Reader } from '../common/STabV1Reader';
 import { Note, Section, Rest } from "../common/Tabular";
 import { GameLogic, GameState, SVGRenderer } from "../common/GameLogic";
@@ -191,24 +191,27 @@ $(document).ready(() => {
   VF.Formatter.FormatAndDraw(context, stave, notes);
 
   // FakeDataSource: simulate user input
-  const dds = new FakeDataSource(fb, "ws://localhost:9002");
-  dds.on("data", (input: {stringID: number, fretID: number})=>{
-
+  const dds = new DriverDataSource(fb, "ws://localhost:9002/licap1");
+  dds.on("data", (string_id: number, note: string)=>{
+    console.log(total);
     // check hit timing
-    gm.Hit(input, total / 1000);
-
+    console.log(string_id);
+    gm.Hit({stringID: string_id, fretID: 0}, total / 1000);
+    console.log(note);
     // render fingerTab
-    fb.press(fb.fretPressPointIndex(input.stringID, input.fretID));
-    fb.pick(input.stringID);
+    
+    fb.press(fb.namePressPointIndex(string_id, note));
+    fb.pick(string_id);
     setTimeout(() => {
-      fb.unpress(fb.fretPressPointIndex(input.stringID, input.fretID));
+      fb.unpress(fb.namePressPointIndex(string_id, note));
+
     }, 300);
   });
 
   // GameLogic
   let canvas = <HTMLCanvasElement>document.createElement("canvas");
   canvas.width = 1085;
-  const red = new SVGRenderer({width: "100%", height: "100%", bpm: 60}, tab);
+  const red = new SVGRenderer({width: "100%", height: "100%", bpm: 60, validDuration: 32}, tab);
   content.appendChild(canvas);
   content.appendChild(red.domElement);
   let cxt = <CanvasRenderingContext2D>canvas.getContext("2d");
@@ -219,7 +222,7 @@ $(document).ready(() => {
   // Press space to hit...
   document.addEventListener('keyup', function(event) {
     if(gm.nowState == GameState.playing && event.keyCode == 32) {   // only hit when game playing...
-      dds.SendData();
+      //dds.SendData();
     }
   });
   

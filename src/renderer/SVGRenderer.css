@@ -6,3 +6,12 @@
 .note-bg-circle {
     fill: white;
 }
+
+.note-fret {
+    font-size: 20px;
+}
+
+.valid-area {
+    fill: red;
+    fill-opacity: 0.4;
+}

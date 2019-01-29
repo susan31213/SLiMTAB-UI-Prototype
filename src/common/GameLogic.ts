@@ -81,6 +81,7 @@ export class GameLogic {
         this.resultList = new Array<NoteState>();
         this.inputList = new Array<{note: NoteLogic, score: number}>();
         this.score = 0;
+        
 
         let eventTypes = new Array<string>();
         eventTypes.push("end");
@@ -362,10 +363,12 @@ export class SVGRenderer {
     private symbolsGroup: SVGGElement;
     private tabular: Tabular;
     private bpm: number;
+    private validDuration: number;
     //private tabDuration: number;
-    private interval: number = 10;
-    constructor(config: {width: string, height: string, bpm: number}, tabular: Tabular) {
+    private interval: number = 40;
+    constructor(config: {width: string, height: string, bpm: number, validDuration: number}, tabular: Tabular) {
         this.bpm = config.bpm;
+        this.validDuration = config.validDuration;
         this.tabular = tabular;
 
         this.domElementP = document.createElementNS(xmlns, "svg");
@@ -378,10 +381,10 @@ export class SVGRenderer {
         // generate six lines:
         for(let i=0; i<6; i++) {
             let line = document.createElementNS(xmlns, "line");
-            line.setAttribute("x1", "0%");
-            line.setAttribute("y1", `${i*10}`);
-            line.setAttribute("x2", "100%");
-            line.setAttribute("y2", `${i*10}`);
+            line.setAttribute("x1", "0vw");
+            line.setAttribute("y1", `${i*2}vh`);
+            line.setAttribute("x2", "100vw");
+            line.setAttribute("y2", `${i*2}vh`);
             line.classList.add("string");
             this.tabularGroup.appendChild(line);
         }
@@ -397,11 +400,19 @@ export class SVGRenderer {
                 const note = section.notes[j];
 
                 if(note instanceof Note) {
+                    const validArea = document.createElementNS(xmlns, "rect");
+                    validArea.classList.add("valid-area");
+                    validArea.setAttribute("style", `transform: translate(${dx-this.interval*1/this.validDuration}vw, 0vh)`);
+                    validArea.setAttribute("width", `${this.interval*1/(this.validDuration/2)}vw`);
+                    validArea.setAttribute("height", `10vh`);
+                    this.symbolsGroup.appendChild(validArea);
                     for(let k=0; k<note.positions.length; k++) {
                     
                         const position = note.positions[k];
                         const noteg = document.createElementNS(xmlns, "g");
-                        noteg.setAttribute("style", `transform: translate(${dx}vw, ${(position.stringID-1)*10}px)`);
+                        
+                        
+                        noteg.setAttribute("style", `transform: translate(${dx}vw, ${(position.stringID-1)*2}vh)`);
                         const circle = document.createElementNS(xmlns, "circle");
                         circle.setAttribute("r", `5`);
                         circle.classList.add("note-bg-circle");
