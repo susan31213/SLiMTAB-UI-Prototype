@@ -1,6 +1,5 @@
 import { DataSource } from "./DataSource";
 import { FingerBoard } from "./FingerBoard";
-import { Note } from "./Tabular";
 
 class FunctionArray {
     [index: string]: Array<Function>;
@@ -49,9 +48,9 @@ export class FakeDataSource extends DataSource {
     }
 
     // Change: Send Note instead of {stringID, note}
-    private sendFakeData(note: Note): void {
+    private sendFakeData(input: {stringID: number, fretID: number}): void {
         this.callbackFuntions["data"].forEach(func => {
-            func(note);
+            func(input);
         });
     }
 
@@ -63,10 +62,6 @@ export class FakeDataSource extends DataSource {
     }
 
     public SendData(): void {
-        const positions: Array<{stringID: number, fretID: number}> = [];
-        positions.push({stringID: 2, fretID: 4});
-        positions.push({stringID: 6, fretID: 3});
-        let note = new Note(positions, 4)
-        this.sendFakeData(note);
+        this.sendFakeData({stringID: 2, fretID: 4});
     }
 };

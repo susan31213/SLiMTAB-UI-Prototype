@@ -192,18 +192,17 @@ $(document).ready(() => {
 
   // FakeDataSource: simulate user input
   const dds = new FakeDataSource(fb, "ws://localhost:9002");
-  dds.on("data", (note: Note)=>{
+  dds.on("data", (input: {stringID: number, fretID: number})=>{
+    
     // check hit timing
-    gm.Hit(note, total / 1000);
+    gm.Hit(input, total / 1000);
 
     // render fingerTab
-    note.positions.forEach(element => {
-      fb.press(fb.fretPressPointIndex(element.stringID, element.fretID));
-      fb.pick(element.stringID);
-      setTimeout(() => {
-        fb.unpress(fb.fretPressPointIndex(element.stringID, element.fretID));
-      }, 300);
-    });
+    fb.press(fb.fretPressPointIndex(input.stringID, input.fretID));
+    fb.pick(input.stringID);
+    setTimeout(() => {
+      fb.unpress(fb.fretPressPointIndex(input.stringID, input.fretID));
+    }, 300);
   });
 
   // GameLogic
