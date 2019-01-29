@@ -201,11 +201,13 @@ export class GameLogic {
                         // TODO: call notify(index, "perfect");
                         //
                         console.log("perfect");
+                        this.score += 10;
                     }
                     else if(this.resultList[this.checkIndex] != 0) {
                         // TODO: call notify(index, "good");
                         //
                         console.log("good");
+                        this.score += this.resultList[this.checkIndex];
                     }
                 }
                 
@@ -279,13 +281,15 @@ export class GameLogic {
         let n = new NoteLogic(new Note(positions, 4), seconds * (this.bpm / 60));
         let s = 0;
 
+        let target;
         let upper = this.noteList.length-1, lower = 0;
         const firstNote = this.noteList[0];
         const lastNote = this.noteList[upper];
         
         // check hit before first note
         if(firstNote.birthTime+1 > beats) {
-            if(check(firstNote)) {
+            target = lastNote;
+            if(check()) {
                 correct = true;
                 // TODO: call notify(0, "perfect")
             }
@@ -293,7 +297,8 @@ export class GameLogic {
 
         // check hit after last note
         else if(lastNote.birthTime+1 < beats) {
-            if(check(lastNote)) {
+            target = lastNote;
+            if(check()) {
                 correct = true;
                 // TODO: call notify(upper, "perfect")
             }
@@ -303,16 +308,15 @@ export class GameLogic {
         else {
             let lowIdx = this.findBound(beats, upper, lower);
             const lowNote = this.noteList[lowIdx], upNote = this.noteList[lowIdx+1];
-            let targetNote;
             if(beats - (lowNote.birthTime + 1) < (upNote.birthTime + 1) - beats) {
                 console.log("close lower bound");
-                targetNote = lowNote;
+                target = lowNote;
             }
             else {
                 console.log("close upper bound");
-                targetNote = upNote;
+                target = upNote;
             }
-            if(check(targetNote)) {
+            if(check()) {
                 correct = true;
             }
         }
@@ -324,21 +328,20 @@ export class GameLogic {
         // Recored hit info
         this.inputList.push({note: n, score: s});
 
-        const self = this;
         // check this hit correteness
-        function check(ans: NoteLogic | RestLogic): boolean {
+        function check(): boolean {
             let include = false;
 
             // hit timing & is it note?
-            if(Math.abs((ans.birthTime + 1) - beats) >= self.range|| ans instanceof Rest)
+            if(Math.abs((target.birthTime + 1) - beats) >= this.range|| target instanceof Rest)
                 return false;
 
             // hit right string & fret?
-            if(ans instanceof NoteLogic) {
-                for(let j=0; j<ans.positions.length; j++) {
-                    if(ans.positions[j].stringID == note.stringID && ans.positions[j].fretID == note.fretID) {
+            if(target instanceof NoteLogic) {
+                for(let j=0; j<target.positions.length; j++) {
+                    if(target.positions[j].stringID == note.stringID && target.positions[j].fretID == note.fretID) {
                         include = true;
-                        ans.corrects[j] = true;
+                        target.corrects[j] = true;
                         break;
                     }
                 }
