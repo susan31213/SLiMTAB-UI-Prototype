@@ -1,7 +1,7 @@
 import { FingerBoard } from '../common/FingerBoard';
 import { WebSession, SessionCommandOp } from '../common/WebSession';
 import { UserDataSource } from '../common/UserDataSource';
-import { FakeDataSource } from '../common/FakeDataSource';
+import { DriverDataSource } from '../common/DriverDataSource';
 import { STabV1Reader } from '../common/STabV1Reader';
 import { Note, Section, Rest } from "../common/Tabular";
 import { GameLogic, GameState, SVGRenderer } from "../common/GameLogic";
@@ -160,7 +160,7 @@ $(document).ready(() => {
   stave.addClef("tab").setContext(context).draw();
 
   // Tabular
-  const testTabular = new STabV1Reader(`[[[4,2,4,6,3,"c"],[4,2,4,6,3,"c"],[4,2,4,6,3,"c"],[4,2,4,6,3,"e"]],[[4,2,4,6,3,"c"],[4,2,4,6,3,"c"],[4,2,4,6,3,"c"],[4,2,4,6,3,"e"]],[[4,0],[4,0],[4,0],[4,0]]]`);
+  const testTabular = new STabV1Reader(`[[[4,1,0,"c"],[4,1,0,"c"],[4,1,0,"c"],[4,2,4,6,3,"e"]],[[4,2,4,6,3,"c"],[4,1,0,"c"],[4,2,4,6,3,"c"],[4,2,4,6,3,"e"]],[[4,0],[4,0],[4,0],[4,0]]]`);
   const tab = testTabular.read();
   const emptySection = new Section();
   emptySection.notes.push(new Rest(1));
@@ -191,19 +191,20 @@ $(document).ready(() => {
   VF.Formatter.FormatAndDraw(context, stave, notes);
 
   // FakeDataSource: simulate user input
-  const dds = new FakeDataSource(fb, "ws://localhost:9002");
-  dds.on("data", (note: Note)=>{
+  const dds = new DriverDataSource(fb, "ws://localhost:9002/licap1");
+  dds.on("data", (string_id: number, note: string)=>{
+    console.log(total);
     // check hit timing
-    gm.Hit(note, total / 1000);
-
+    console.log(string_id)
+    gm.Hit(new Note([{stringID: string_id, fretID: 0}], 0), total / 1000);
+    console.log(note);
     // render fingerTab
-    note.positions.forEach(element => {
-      fb.press(fb.fretPressPointIndex(element.stringID, element.fretID));
-      fb.pick(element.stringID);
-      setTimeout(() => {
-        fb.unpress(fb.fretPressPointIndex(element.stringID, element.fretID));
-      }, 300);
-    });
+    
+    fb.press(fb.namePressPointIndex(string_id, note));
+    fb.pick(string_id);
+    setTimeout(() => {
+      fb.unpress(fb.namePressPointIndex(string_id, note));
+    }, 300);
   });
 
   // GameLogic
@@ -220,7 +221,7 @@ $(document).ready(() => {
   // Press space to hit...
   document.addEventListener('keyup', function(event) {
     if(gm.nowState == GameState.playing && event.keyCode == 32) {   // only hit when game playing...
-      dds.SendData();
+      //dds.SendData();
     }
   });
   

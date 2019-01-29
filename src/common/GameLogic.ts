@@ -303,7 +303,7 @@ export class SVGRenderer {
     private tabular: Tabular;
     private bpm: number;
     //private tabDuration: number;
-    private interval: number = 10;
+    private interval: number = 40;
     constructor(config: {width: string, height: string, bpm: number}, tabular: Tabular) {
         this.bpm = config.bpm;
         this.tabular = tabular;
@@ -318,10 +318,10 @@ export class SVGRenderer {
         // generate six lines:
         for(let i=0; i<6; i++) {
             let line = document.createElementNS(xmlns, "line");
-            line.setAttribute("x1", "0%");
-            line.setAttribute("y1", `${i*10}`);
-            line.setAttribute("x2", "100%");
-            line.setAttribute("y2", `${i*10}`);
+            line.setAttribute("x1", "0vw");
+            line.setAttribute("y1", `${i*2}vh`);
+            line.setAttribute("x2", "100vw");
+            line.setAttribute("y2", `${i*2}vh`);
             line.classList.add("string");
             this.tabularGroup.appendChild(line);
         }
@@ -341,7 +341,7 @@ export class SVGRenderer {
                     
                         const position = note.positions[k];
                         const noteg = document.createElementNS(xmlns, "g");
-                        noteg.setAttribute("style", `transform: translate(${dx}vw, ${(position.stringID-1)*10}px)`);
+                        noteg.setAttribute("style", `transform: translate(${dx}vw, ${(position.stringID-1)*2}vh)`);
                         const circle = document.createElementNS(xmlns, "circle");
                         circle.setAttribute("r", `5`);
                         circle.classList.add("note-bg-circle");
