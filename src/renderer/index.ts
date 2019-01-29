@@ -215,7 +215,7 @@ $(document).ready(() => {
   content.appendChild(canvas);
   content.appendChild(red.domElement);
   let cxt = <CanvasRenderingContext2D>canvas.getContext("2d");
-  let gm = new GameLogic(fb, cxt, tab, {fps: 60, bpm:60});
+  let gm = new GameLogic(fb, cxt, tab, {fps: 60, bpm:60, range: 32});
   // dds.startSendData(1000);
 
   /////// Event Listener ///////

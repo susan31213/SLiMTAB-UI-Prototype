@@ -271,7 +271,26 @@ export class GameLogic {
     }
 
     public Hit(note: {stringID: number, fretID: number}, seconds: number) {
+        // check this hit correteness
+        const check = (ans: NoteLogic | RestLogic) => {
+            let include = false;
 
+            // hit timing & is it note?
+            if(Math.abs((ans.birthTime + 1) - beats) >= this.range|| ans instanceof Rest)
+                return false;
+
+            // hit right string & fret?
+            if(ans instanceof NoteLogic) {
+                for(let j=0; j<ans.positions.length; j++) {
+                    if(ans.positions[j].stringID == note.stringID && ans.positions[j].fretID == note.fretID) {
+                        include = true;
+                        ans.corrects[j] = true;
+                        break;
+                    }
+                }
+            }
+            return include;
+        };
         const beats = seconds * this.bpm / 60;
         let correct = false;
 
@@ -326,27 +345,7 @@ export class GameLogic {
         // Recored hit info
         this.inputList.push({note: n, score: s});
 
-        const self = this;
-        // check this hit correteness
-        function check(ans: NoteLogic | RestLogic): boolean {
-            let include = false;
 
-            // hit timing & is it note?
-            if(Math.abs((ans.birthTime + 1) - beats) >= self.range|| ans instanceof Rest)
-                return false;
-
-            // hit right string & fret?
-            if(ans instanceof NoteLogic) {
-                for(let j=0; j<ans.positions.length; j++) {
-                    if(ans.positions[j].stringID == note.stringID && ans.positions[j].fretID == note.fretID) {
-                        include = true;
-                        ans.corrects[j] = true;
-                        break;
-                    }
-                }
-            }
-            return include;
-        }
     }
 
     public get nowState(): GameState {
