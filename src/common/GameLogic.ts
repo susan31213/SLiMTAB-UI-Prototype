@@ -248,29 +248,33 @@ export class GameLogic {
                 const beats = seconds * this.bpm / 60 -1;
                 let upper = this.noteList.length-1, lower = 0;
 
-                const upperNote = this.noteList[upper];
-                if(upperNote.birthTime / (upperNote.duration/4) < beats) {
-                    if(Math.abs(upperNote.birthTime / (upperNote.duration/4)) < 0.5) {
-                        if(upperNote instanceof Note) {
-                            this.score += 10;
-                        }
+                // check hit after last note
+                const lastNote = this.noteList[upper];
+                if(lastNote.birthTime / (lastNote.duration/4) < beats) {
+                    if(Math.abs(lastNote.birthTime / (lastNote.duration/4) - beats) < 0.0625 && lastNote instanceof Note) {
+                        s = 10;
+                        this.resultList[upper] = NoteState.perfect;
+                        // TODO: call notify(upper, "perfect")
                     }
                 }
+                // check hit between two notes
                 else {
                     const idx = this.foundBound(beats, upper, lower);
                     const lowNote = this.noteList[idx], upNote = this.noteList[idx+1];
-                    if(beats - lowNote.birthTime / (upperNote.duration/4) < upNote.birthTime / (upperNote.duration/4) - beats) {
+                    if(beats - lowNote.birthTime / (lastNote.duration/4) < upNote.birthTime / (lastNote.duration/4) - beats) {
                         console.log("close lower bound");
                         if(Math.abs(beats - lowNote.birthTime / (lowNote.duration/4)) < 0.0625 && lowNote instanceof Note) {
                             s = 10;
-                            this.resultList[i] = NoteState.perfect;
+                            this.resultList[idx] = NoteState.perfect;
+                            // TODO: call notify(idx, "perfect")
                         }
                     }
                     else {
                         console.log("close upper bound");
-                        if(Math.abs(upNote.birthTime / (upNote.duration/4) - beats) < 0.1 && upNote instanceof Note) {
+                        if(Math.abs(upNote.birthTime / (upNote.duration/4) - beats) < 0.0625 && upNote instanceof Note) {
                             s = 10;
-                            this.resultList[i] = NoteState.perfect;
+                            this.resultList[idx+1] = NoteState.perfect;
+                            // TODO: call notify(idx, "perfect")
                         }
                     }
                 }
@@ -291,6 +295,10 @@ export class GameLogic {
 
     public get nowState(): GameState {
         return this.state;
+    }
+
+    public get notelist(): Array<NoteLogic | RestLogic> {
+        return this.noteList;
     }
 }
 
