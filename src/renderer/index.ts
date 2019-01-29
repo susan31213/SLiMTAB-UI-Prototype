@@ -195,8 +195,8 @@ $(document).ready(() => {
   dds.on("data", (string_id: number, note: string)=>{
     console.log(total);
     // check hit timing
-    console.log(string_id)
-    gm.Hit(new Note([{stringID: string_id, fretID: 0}], 0), total / 1000);
+    console.log(string_id);
+    gm.Hit({stringID: string_id, fretID: 0}, total / 1000);
     console.log(note);
     // render fingerTab
     
@@ -204,6 +204,7 @@ $(document).ready(() => {
     fb.pick(string_id);
     setTimeout(() => {
       fb.unpress(fb.namePressPointIndex(string_id, note));
+
     }, 300);
   });
 
