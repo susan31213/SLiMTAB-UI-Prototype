@@ -2,7 +2,7 @@ import { Tabular, Note, Rest } from "../common/Tabular";
 import { FingerBoard } from "./FingerBoard";
 
 class NoteLogic extends Note {
-    public birthTime: number;    // change to beats
+    public birthTime: number;
     public x: number;
     public state: number;
     public corrects: Array<boolean>;
@@ -11,7 +11,10 @@ class NoteLogic extends Note {
         this.birthTime = birth;
         this.x = 1070;
         this.state = NoteState.hidden;
-        this.corrects = [false, false, false, false, false, false];
+        this.corrects = [];
+        this.positions.forEach(() => {
+            this.corrects.push(false);
+        });
     }
 };
   
@@ -58,6 +61,7 @@ export class GameLogic {
     private tab: Tabular;
     private bpm: number;
     private noteList: Array<NoteLogic | RestLogic>;
+    private checkIndex: number;
     private resultList: Array<NoteState>;
     private inputList: Array<{note: NoteLogic, score: number}>;
     private score: number;
@@ -73,6 +77,7 @@ export class GameLogic {
         this.tab = tab;
         this.bpm = config.bpm;
         this.noteList = new Array<NoteLogic | RestLogic>();
+        this.checkIndex = 0;
         this.resultList = new Array<NoteState>();
         this.inputList = new Array<{note: NoteLogic, score: number}>();
         this.score = 0;
@@ -171,6 +176,46 @@ export class GameLogic {
                     n.state = NoteState.die;
                 }
             });
+                
+            // Draw notes & scores
+            this.renderer.draw(this.noteList, this.score);
+
+            // find unchecked note, check correctness
+            if(this.state == GameState.playing) {
+                const beats = timer/1000 * this.bpm / 60;
+                const n = this.noteList[this.checkIndex];
+                
+                if(beats - (n.birthTime+1) > 0.125) {
+
+                    if(n instanceof Note) {
+                        let correct = 0;
+                        n.corrects.forEach(element => {
+                            if(element) {
+                                correct++;
+                            }
+                        });
+
+                        if(correct == n.positions.length) {
+                            // TODO: call notify(index, "perfect");
+                            //
+                            console.log("perfect");
+                        }
+                        else if(correct != 0) {
+                            // TODO: call notify(index, "good");
+                            //
+                            console.log("good");
+                        }
+                    }
+                    
+                    this.checkIndex++;
+                    if(this.checkIndex == this.noteList.length)
+                        this.checkIndex -= 1;
+                }
+            }
+
+            // Replay
+            if(this.state == GameState.replaying)
+                this.replayFingerBoard(timer);
             
             // if no note, end game
             let noNote = true;
@@ -182,17 +227,10 @@ export class GameLogic {
                 this.state = GameState.end;
                 this.onGameEnd();
             }
-                
-            // Draw notes & scores
-            this.renderer.draw(this.noteList, this.score);
-
-            // Replay
-            if(this.state == GameState.replaying)
-                this.replay(timer);
         }
     }
 
-    private replay(timer: number) {
+    private replayFingerBoard(timer: number) {
 
         for(let i=0; i<this.inputList.length; i++) {
             let input = this.inputList[i];
@@ -247,7 +285,6 @@ export class GameLogic {
         // check hit before first note
         if(firstNote.birthTime+1 > beats) {
             if(check(firstNote)) {
-                s = 10;
                 correct = true;
                 // TODO: call notify(0, "perfect")
             }
@@ -256,7 +293,6 @@ export class GameLogic {
         // check hit after last note
         else if(lastNote.birthTime+1 < beats) {
             if(check(lastNote)) {
-                s = 10;
                 correct = true;
                 // TODO: call notify(upper, "perfect")
             }
@@ -276,7 +312,6 @@ export class GameLogic {
                 targetNote = upNote;
             }
             if(check(targetNote)) {
-                s = 10;
                 correct = true;
             }
         }
@@ -293,9 +328,7 @@ export class GameLogic {
             let include = false;
 
             // hit timing & is it note?
-            console.log(`beats: ${beats}`);
-            console.log(ans.birthTime + 1);
-            if(Math.abs((ans.birthTime + 1) - beats) >= 0.065|| ans instanceof Rest)
+            if(Math.abs((ans.birthTime + 1) - beats) >= 0.125|| ans instanceof Rest)
                 return false;
 
             // hit right string & fret?

@@ -160,7 +160,7 @@ $(document).ready(() => {
   stave.addClef("tab").setContext(context).draw();
 
   // Tabular
-  const testTabular = new STabV1Reader(`[[[4,1,0,"c"],[4,1,0,"c"],[8,1,0,"c"],[8,1,0,"c"],[8,1,0,"c"],[8,1,0,"e"]],[[4,1,0,"c"],[4,1,0,"c"],[4,1,0,"c"],[4,1,0,"e"]],[[4,0],[4,0],[4,0],[4,0]]]`);
+  const testTabular = new STabV1Reader(`[[[4,1,0,"c"],[4,1,0,"c"],[8,1,0,"c"],[8,1,0,"c"],[8,1,0,"c"],[8,1,0,"e"]],[[4,1,0,2,1,"c"],[4,1,0,2,1,"c"],[4,1,0,"c"],[4,1,0,"e"]],[[4,0],[4,0],[4,0],[4,0]]]`);
   const tab = testTabular.read();
   const emptySection = new Section();
   emptySection.notes.push(new Rest(1));
