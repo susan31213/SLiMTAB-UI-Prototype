@@ -60,6 +60,7 @@ export class GameLogic {
     private startStamp: number;
     private tab: Tabular;
     private bpm: number;
+    private range: number;
     private noteList: Array<NoteLogic | RestLogic>;
     private checkIndex: number;
     private resultList: Array<NoteState>;
@@ -68,7 +69,7 @@ export class GameLogic {
 
     private callbackFuntions: FunctionArray;
 
-    constructor(fb: FingerBoard, c: CanvasRenderingContext2D, tab: Tabular, config: {fps: number, bpm: number}) {
+    constructor(fb: FingerBoard, c: CanvasRenderingContext2D, tab: Tabular, config: {fps: number, bpm: number, range: number}) {
         this.fb = fb;
         this.renderer = new TestRenderer(c, config.fps, config.bpm);
         this.state = GameState.end;
@@ -76,6 +77,7 @@ export class GameLogic {
         this.startStamp = -1;
         this.tab = tab;
         this.bpm = config.bpm;
+        this.range = 4/config.range;
         this.noteList = new Array<NoteLogic | RestLogic>();
         this.checkIndex = 0;
         this.resultList = new Array<NoteState>();
@@ -186,7 +188,7 @@ export class GameLogic {
                 const beats = timer/1000 * this.bpm / 60;
                 const n = this.noteList[this.checkIndex];
                 
-                if(beats - (n.birthTime+1) > 0.125) {
+                if(beats - (n.birthTime+1) > this.range) {
 
                     if(n instanceof Note) {
                         let correct = 0;
@@ -324,12 +326,13 @@ export class GameLogic {
         // Recored hit info
         this.inputList.push({note: n, score: s});
 
+        const self = this;
         // check this hit correteness
         function check(ans: NoteLogic | RestLogic): boolean {
             let include = false;
 
             // hit timing & is it note?
-            if(Math.abs((ans.birthTime + 1) - beats) >= 0.125|| ans instanceof Rest)
+            if(Math.abs((ans.birthTime + 1) - beats) >= self.range|| ans instanceof Rest)
                 return false;
 
             // hit right string & fret?
