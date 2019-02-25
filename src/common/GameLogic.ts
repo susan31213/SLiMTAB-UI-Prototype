@@ -63,7 +63,7 @@ export class GameLogic {
     private range: number;
     private noteList: Array<NoteLogic | RestLogic>;
     private checkIndex: number;
-    private resultList: Array<NoteState>;
+    private resultList: Array<number>;
     private inputList: Array<{note: NoteLogic, score: number}>;
     private score: number;
 
@@ -80,7 +80,7 @@ export class GameLogic {
         this.range = 4/config.range;
         this.noteList = new Array<NoteLogic | RestLogic>();
         this.checkIndex = 0;
-        this.resultList = new Array<NoteState>();
+        this.resultList = new Array<number>();
         this.inputList = new Array<{note: NoteLogic, score: number}>();
         this.score = 0;
         
@@ -140,10 +140,11 @@ export class GameLogic {
         if(this.state == GameState.end) {
             this.state = GameState.playing;
             this.startStamp = Date.now();
+            this.checkIndex = 0;
             this.makeNoteList(this.tab);
             this.resultList = [];
             this.noteList.forEach(() => {
-                this.resultList.push(NoteState.shown);
+                this.resultList.push(0);
             });
             this.inputList = [];
             this.score = 0;
@@ -155,6 +156,7 @@ export class GameLogic {
         if(this.state == GameState.end) {
             this.state = GameState.replaying;
             this.startStamp = Date.now();
+            this.checkIndex = 0;
             this.makeNoteList(this.tab);
             this.inputList.forEach(element => {
                 element.note.state = NoteState.hidden;
@@ -184,36 +186,36 @@ export class GameLogic {
             this.renderer.draw(this.noteList, this.score);
 
             // find unchecked note, check correctness
-            if(this.state == GameState.playing) {
-                const beats = timer/1000 * this.bpm / 60;
-                const n = this.noteList[this.checkIndex];
-                
-                if(beats - (n.birthTime+1) > this.range) {
-
-                    if(n instanceof Note) {
-                        let correct = 0;
+            const beats = timer/1000 * this.bpm / 60;
+            const n = this.noteList[this.checkIndex];
+            if(beats - (n.birthTime+1) > this.range) {
+                if(n instanceof Note) {
+                    if(this.state == GameState.playing) {
+                        this.resultList[this.checkIndex] = 0;
                         n.corrects.forEach(element => {
                             if(element) {
-                                correct++;
+                                this.resultList[this.checkIndex]++;
                             }
                         });
-
-                        if(correct == n.positions.length) {
-                            // TODO: call notify(index, "perfect");
-                            //
-                            console.log("perfect");
-                        }
-                        else if(correct != 0) {
-                            // TODO: call notify(index, "good");
-                            //
-                            console.log("good");
-                        }
                     }
-                    
-                    this.checkIndex++;
-                    if(this.checkIndex == this.noteList.length)
-                        this.checkIndex -= 1;
+
+                    if(this.resultList[this.checkIndex] == n.positions.length) {
+                        // TODO: call notify(index, "perfect");
+                        //
+                        console.log("perfect");
+                        this.score += 10;
+                    }
+                    else if(this.resultList[this.checkIndex] != 0) {
+                        // TODO: call notify(index, "good");
+                        //
+                        console.log("good");
+                        this.score += this.resultList[this.checkIndex];
+                    }
                 }
+                
+                this.checkIndex++;
+                if(this.checkIndex == this.noteList.length)
+                    this.checkIndex -= 1;
             }
 
             // Replay
@@ -272,13 +274,13 @@ export class GameLogic {
 
     public Hit(note: {stringID: number, fretID: number}, seconds: number) {
         // check this hit correteness
-        const check = (ans: NoteLogic | RestLogic) => {
+        const check = (ans: NoteLogic | RestLogic, beats: number, note:{stringID: number, fretID: number}) => {
             let include = false;
 
             // hit timing & is it note?
-            if(Math.abs((ans.birthTime + 1) - beats) >= this.range|| ans instanceof Rest)
+            if(Math.abs((ans.birthTime + 1) - beats) >= this.range || ans instanceof Rest)
                 return false;
-
+    
             // hit right string & fret?
             if(ans instanceof NoteLogic) {
                 for(let j=0; j<ans.positions.length; j++) {
@@ -300,13 +302,14 @@ export class GameLogic {
         let n = new NoteLogic(new Note(positions, 4), seconds * (this.bpm / 60));
         let s = 0;
 
+        let target: NoteLogic | RestLogic;
         let upper = this.noteList.length-1, lower = 0;
         const firstNote = this.noteList[0];
         const lastNote = this.noteList[upper];
         
         // check hit before first note
         if(firstNote.birthTime+1 > beats) {
-            if(check(firstNote)) {
+            if(check(firstNote, beats, note)) {
                 correct = true;
                 // TODO: call notify(0, "perfect")
             }
@@ -314,7 +317,7 @@ export class GameLogic {
 
         // check hit after last note
         else if(lastNote.birthTime+1 < beats) {
-            if(check(lastNote)) {
+            if(check(lastNote, beats, note)) {
                 correct = true;
                 // TODO: call notify(upper, "perfect")
             }
@@ -324,16 +327,15 @@ export class GameLogic {
         else {
             let lowIdx = this.findBound(beats, upper, lower);
             const lowNote = this.noteList[lowIdx], upNote = this.noteList[lowIdx+1];
-            let targetNote;
             if(beats - (lowNote.birthTime + 1) < (upNote.birthTime + 1) - beats) {
                 console.log("close lower bound");
-                targetNote = lowNote;
+                target = lowNote;
             }
             else {
                 console.log("close upper bound");
-                targetNote = upNote;
+                target = upNote;
             }
-            if(check(targetNote)) {
+            if(check(target, beats, note)) {
                 correct = true;
             }
         }
@@ -344,7 +346,6 @@ export class GameLogic {
 
         // Recored hit info
         this.inputList.push({note: n, score: s});
-
 
     }
 
