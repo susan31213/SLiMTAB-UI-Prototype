@@ -7,6 +7,7 @@ import { Note, Section, Rest } from "../common/Tabular";
 import { GameLogic, GameState, SVGRenderer } from "../common/GameLogic";
 
 import * as Vex from 'vexflow';
+import { readFileSync } from 'fs';
 
 var fb: FingerBoard;
 var wb: WebSession;
@@ -156,11 +157,12 @@ $(document).ready(() => {
   
   // Create a tab stave of width 400 at position 10, 40 on the canvas.
   
-  var stave = new VF.TabStave(10, 40, 400);
-  stave.addClef("tab").setContext(context).draw();
+  //var stave = new VF.TabStave(10, 40, 400);
+ // stave.addClef("tab").setContext(context).draw();
 
   // Tabular
-  const testTabular = new STabV1Reader(`[[[4,1,0,"c"],[4,1,0,"c"],[8,1,0,"c"],[8,1,0,"c"],[8,1,0,"c"],[8,1,0,"e"]],[[4,1,0,2,1,"c"],[4,1,0,2,1,"c"],[4,1,0,"c"],[4,1,0,"e"]],[[4,0],[4,0],[4,0],[4,0]]]`);
+  const tabsrc = readFileSync("tab.txt", {encoding: 'utf-8'});
+  const testTabular = new STabV1Reader(tabsrc);
   const tab = testTabular.read();
   const emptySection = new Section();
   emptySection.notes.push(new Rest(1));
@@ -188,7 +190,7 @@ $(document).ready(() => {
     }
     notes.push(new Vex.Flow.BarNote());
   }
-  VF.Formatter.FormatAndDraw(context, stave, notes);
+  //VF.Formatter.FormatAndDraw(context, stave, notes);
 
   // FakeDataSource: simulate user input
   const dds = new DriverDataSource(fb, "ws://localhost:9002/licap1");

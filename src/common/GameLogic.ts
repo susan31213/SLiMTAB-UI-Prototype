@@ -55,7 +55,6 @@ class FunctionArray {
 
 export class GameLogic {
     private fb: FingerBoard;
-    private renderer: TestRenderer;
     private state: GameState;
     private startStamp: number;
     private tab: Tabular;
@@ -65,7 +64,8 @@ export class GameLogic {
     private checkIndex: number;
     private resultList: Array<number>;
     private inputList: Array<{note: NoteLogic, score: number}>;
-    private score: number;
+    private scoreP: number;
+    private renderer: TestRenderer;
 
     private callbackFuntions: FunctionArray;
 
@@ -82,7 +82,7 @@ export class GameLogic {
         this.checkIndex = 0;
         this.resultList = new Array<number>();
         this.inputList = new Array<{note: NoteLogic, score: number}>();
-        this.score = 0;
+        this.scoreP = 0;
         
 
         let eventTypes = new Array<string>();
@@ -101,6 +101,7 @@ export class GameLogic {
             func();
         });
     }
+
 
     private makeNoteList(tab: Tabular) {
 
@@ -135,6 +136,11 @@ export class GameLogic {
         this.noteList.shift();
     }
 
+    get score(): number {
+        return this.scoreP;
+    }
+
+
     public StartGame() {
         
         if(this.state == GameState.end) {
@@ -147,7 +153,7 @@ export class GameLogic {
                 this.resultList.push(0);
             });
             this.inputList = [];
-            this.score = 0;
+            this.scoreP = 0;
         }
     }
 
@@ -161,7 +167,7 @@ export class GameLogic {
             this.inputList.forEach(element => {
                 element.note.state = NoteState.hidden;
             });
-            this.score = 0;
+            this.scoreP = 0;
         }
     }
 
@@ -203,13 +209,13 @@ export class GameLogic {
                         // TODO: call notify(index, "perfect");
                         //
                         console.log("perfect");
-                        this.score += 10;
+                        this.scoreP += 10;
                     }
                     else if(this.resultList[this.checkIndex] != 0) {
                         // TODO: call notify(index, "good");
                         //
                         console.log("good");
-                        this.score += this.resultList[this.checkIndex];
+                        this.scoreP += this.resultList[this.checkIndex];
                     }
                 }
                 
@@ -241,7 +247,7 @@ export class GameLogic {
             let input = this.inputList[i];
             if(input.note.state == NoteState.hidden && input.note.birthTime*(60/this.bpm*1000) <= timer) {
                 input.note.state = NoteState.shown;
-                this.score += this.inputList[i].score;
+                this.scoreP += this.inputList[i].score;
                 let n = input.note as Note;
                 if(n != undefined) {
                     n.positions.forEach(element => {
@@ -342,7 +348,7 @@ export class GameLogic {
 
         if(!correct)
             s = -1;
-        this.score += s;
+        this.scoreP += s;
 
         // Recored hit info
         this.inputList.push({note: n, score: s});
@@ -455,6 +461,7 @@ export class SVGRenderer {
     }
 }
 
+
 class TestRenderer {
     private cxt: CanvasRenderingContext2D;
     private updateInterval: number;    
@@ -478,11 +485,12 @@ class TestRenderer {
   
     public draw(showList: Array<NoteLogic | RestLogic>, score: number): void {
 
+
       this.cxt.clearRect(0,0,(<HTMLCanvasElement>this.cxt.canvas).width,(<HTMLCanvasElement>this.cxt.canvas).height);
       // draw hit area
-      this.cxt.beginPath();
-      this.cxt.arc(100, 100, 20, 0, 2 * Math.PI);
-      this.cxt.stroke();
+      //this.cxt.beginPath();
+      //this.cxt.arc(100, 100, 20, 0, 2 * Math.PI);
+      //this.cxt.stroke();
       showList.forEach(element => {
         // draw
         if(element.state == NoteState.shown) {
@@ -492,11 +500,12 @@ class TestRenderer {
             else if(element instanceof RestLogic) {
                 this.cxt.fillStyle = "#3370d4";
             }
+            /*
             this.cxt.beginPath();
             this.cxt.arc(element.x, 100, 10, 0, 2 * Math.PI);
             this.cxt.closePath();
             this.cxt.fill();
-    
+    */
             element.x -= (this.bpm/60)*970*this.updateInterval;
         }
         
@@ -508,3 +517,4 @@ class TestRenderer {
       this.cxt.fillText(`Score: ${score}`, 10, 50);
     }
   }
+  

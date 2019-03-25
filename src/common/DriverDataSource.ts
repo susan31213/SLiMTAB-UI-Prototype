@@ -22,6 +22,12 @@ export class DriverDataSource extends DataSource {
         eventTypes.push("data");
         this.callbackFuntions = new FunctionArray(eventTypes);
         this.wsData.onmessage = this.onDataMessage.bind(this);
+
+        document.addEventListener('keypress', () => {
+            this.callbackFuntions["data"].forEach(func => {
+                func(1, "E4");
+            });
+        })
     }
 
     public on(ename: string, cbk: (...args: any[])=>void): void {
