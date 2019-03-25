@@ -193,19 +193,25 @@ $(document).ready(() => {
   // FakeDataSource: simulate user input
   const dds = new DriverDataSource(fb, "ws://localhost:9002/licap1");
   dds.on("data", (string_id: number, note: string)=>{
+    if(note == 'B2')
+      return;
     console.log(total);
     // check hit timing
     console.log(string_id);
-    gm.Hit({stringID: string_id, fretID: 0}, total / 1000);
-    console.log(note);
-    // render fingerTab
-    
+
     fb.press(fb.namePressPointIndex(string_id, note));
     fb.pick(string_id);
     setTimeout(() => {
       fb.unpress(fb.namePressPointIndex(string_id, note));
 
     }, 300);
+
+    if(gm.nowState==GameState.playing) {
+      gm.Hit({stringID: string_id, fretID: 0}, total / 1000);
+    }
+    console.log(note);
+    // render fingerTab
+  
   });
 
   // GameLogic
