@@ -1,17 +1,131 @@
+@font-face {
+    font-family: 'MyFont';
+    src: url('font/wtg-06cut1x.ttf') format('truetype');
+}
+
+svg {
+    cursor: default;
+    user-select: none;
+    font-family: 'MyFont';
+}
+
 .string {
+    stroke: #808080;
+    stroke-width: 1px;
+}
+.score-text {
+    font-size: 48px;
+    fill: #e99415;
+}
+
+.hit-base-circle {
+    fill: #808080;
+}
+
+.hit-action-circle {
+    stroke-width: 4px;
+    stroke: #333333;
+    fill: none;
+}
+
+.fire-hit-action {
+    animation: hit-action 300ms; 
+}
+
+.note-fret {
+    font-family: 'Segoe UI';
+    font-size: 22px;
+    fill: #FFFFFF;
+}
+
+.string-group {
+    transform: translate(0, 136px);
+}
+
+.hitbox {
+    fill: #67B2C7;
+    fill-opacity: 0.5;
+}
+
+.scanline {
     stroke: black;
     stroke-width: 2px;
 }
 
-.note-bg-circle {
-    fill: white;
+.link {
+    stroke: #71CDB4;
+    stroke-width: 2px;
 }
 
-.note-fret {
-    font-size: 20px;
+.note-bg-circle {
+    fill: #FCAC23;
+}
+
+.note-link-border {
+    stroke: #71CDB4;
+    stroke-width: 2px;
 }
 
 .valid-area {
-    fill: red;
+    fill: #E7682C;
     fill-opacity: 0.4;
+}
+.fire-hit-animation {
+    animation: hit;
+    animation-duration: 500ms;
+}
+
+.bg-rect {
+    fill: url('#bg-gradient');
+}
+
+.bg-rect-string {
+    fill: url('#bg-gradient');
+}
+
+.fire-prefect-action {
+    animation: perfect-hit-action;
+    animation-duration: 300ms;
+}
+
+.perfect {
+    animation: perfect-hit;
+    animation-duration: 500ms;
+}
+
+@keyframes hit {
+    from{
+        fill: #FAAB2B;
+    }
+    to{
+        fill: #67B2C7;
+    }
+}
+
+
+@keyframes hit-action {
+    from{
+        stroke: #FAAB2B;
+    }
+    to{
+        stroke: #333333;
+    }
+}
+
+@keyframes perfect-hit-action {
+    from{
+        stroke: #06c67d;
+    }
+    to{
+        stroke: #333333;
+    }
+}
+
+@keyframes perfect-hit {
+    from{
+        opacity: 1;
+    }
+    to{
+        opacity: 0;
+    }
 }

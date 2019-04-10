@@ -7,8 +7,6 @@
         "newLine": "LF",
         "allowSyntheticDefaultImports": true,
         "strict": true,
-        "noUnusedLocals": true,
-        "noUnusedParameters": true,
         "sourceMap": true,
         "skipLibCheck": true,
         "allowJs": true,

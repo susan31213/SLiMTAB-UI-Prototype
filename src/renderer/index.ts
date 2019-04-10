@@ -5,6 +5,7 @@ import { DriverDataSource } from '../common/DriverDataSource';
 import { STabV1Reader } from '../common/STabV1Reader';
 import { Note, Section, Rest } from "../common/Tabular";
 import { GameLogic, GameState, SVGRenderer } from "../common/GameLogic";
+import {D3Renderer} from "../common/Renderer";
 
 import * as Vex from 'vexflow';
 import { readFileSync } from 'fs';
@@ -89,7 +90,7 @@ function init() {
     fb.drawFingerTab();
     let container: HTMLElement | null = document.getElementById('footer');
     if(container != null) {
-      container.appendChild(fb.domElement);
+      //container.appendChild(fb.domElement);
       container.appendChild(document.createElement("br"));
     }
   }
@@ -180,8 +181,6 @@ $(document).ready(() => {
         })
         
         notes.push(new VF.TabNote({positions: positions, duration: note_value[Math.floor(Math.log2(duration))]}, true));
-        
-
       } else {
         notes.push(new VF.StaveNote({keys: ["b/4"], duration: note_value[Math.floor(Math.log2(duration))]+"r" }));
       }
@@ -200,28 +199,32 @@ $(document).ready(() => {
     console.log(total);
     // check hit timing
     console.log(string_id);
-
+/*
     fb.press(fb.namePressPointIndex(string_id, note));
     fb.pick(string_id);
     setTimeout(() => {
       fb.unpress(fb.namePressPointIndex(string_id, note));
-
     }, 300);
-
+*/
     if(gm.nowState==GameState.playing) {
       gm.Hit({stringID: string_id, fretID: 0}, total / 1000);
     }
+    
     console.log(note);
     // render fingerTab
-  
+    red.fireHitEvent(string_id, note);
+    
+    //red.fireHitEvent();
   });
 
   // GameLogic
   let canvas = <HTMLCanvasElement>document.createElement("canvas");
   canvas.width = 1085;
-  const red = new SVGRenderer({width: "100%", height: "100%", bpm: 60, validDuration: 32}, tab);
+  //const red = new SVGRenderer({width: "100%", height: "100%", bpm: 60, validDuration: 32}, tab);
+  const red = new D3Renderer(tab, {string_interval: 3.5, bpm: 60, beat_interval: 40});
   content.appendChild(canvas);
-  content.appendChild(red.domElement);
+  if(red.domElement != null)
+    content.appendChild(red.domElement);
   let cxt = <CanvasRenderingContext2D>canvas.getContext("2d");
   let gm = new GameLogic(fb, cxt, tab, {fps: 60, bpm:60, range: 32});
   // dds.startSendData(1000);
@@ -257,8 +260,13 @@ $(document).ready(() => {
 
   gm.on("end", () => {
     cancelAnimationFrame(updateRequestID);
-    red.setTime(0);
+    red.reset();
     console.log(`Total time: ${total}`);
+  });
+  
+  gm.on("perfect", (n: Note) => {
+    red.firePerfectEvent(n);
+    red.killNote(n);
   });
 
   function startTimer() {
@@ -278,6 +286,7 @@ $(document).ready(() => {
     if (elapsed > fpsInterval) {
       then = now - (elapsed % fpsInterval);
       gm.Update();
+      red.score = gm.score;
       if(gm.nowState == GameState.playing)
         red.setTime(total / 1000.0);
     }

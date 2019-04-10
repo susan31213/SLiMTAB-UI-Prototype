@@ -6,8 +6,10 @@ class NoteLogic extends Note {
     public x: number;
     public state: number;
     public corrects: Array<boolean>;
+    public parent: Note;
     constructor(note: Note, birth: number) {
-        super(note.positions, note.duration)
+        super(note.positions, note.duration);
+        this.parent = note;
         this.birthTime = birth;
         this.x = 1070;
         this.state = NoteState.hidden;
@@ -87,12 +89,14 @@ export class GameLogic {
 
         let eventTypes = new Array<string>();
         eventTypes.push("end");
+        eventTypes.push("perfect");
+        eventTypes.push("good");
         this.callbackFuntions = new FunctionArray(eventTypes);
     }
 
     public on(ename: string, cbk: (arg: any) => void): void {
-        if(ename=="end") {
-            this.callbackFuntions["end"].push(cbk);
+        if(this.callbackFuntions[ename]!=undefined) {
+            this.callbackFuntions[ename].push(cbk);
         }
     }
 
@@ -210,12 +214,18 @@ export class GameLogic {
                         //
                         console.log("perfect");
                         this.scoreP += 10;
+                        this.callbackFuntions["perfect"].forEach(func => {
+                            func(n.parent);
+                        });
                     }
                     else if(this.resultList[this.checkIndex] != 0) {
                         // TODO: call notify(index, "good");
                         //
                         console.log("good");
                         this.scoreP += this.resultList[this.checkIndex];
+                        this.callbackFuntions["good"].forEach(func => {
+                            func(n.parent);
+                        });
                     }
                 }
                 
@@ -352,7 +362,6 @@ export class GameLogic {
 
         // Recored hit info
         this.inputList.push({note: n, score: s});
-
     }
 
     public get nowState(): GameState {
@@ -375,6 +384,7 @@ export class SVGRenderer {
     private validDuration: number;
     //private tabDuration: number;
     private interval: number = 40;
+    private hitbox: SVGRectElement;
     constructor(config: {width: string, height: string, bpm: number, validDuration: number}, tabular: Tabular) {
         this.bpm = config.bpm;
         this.validDuration = config.validDuration;
@@ -385,22 +395,41 @@ export class SVGRenderer {
         this.domElementP.setAttribute("height", `${config.height}`);
         this.tabularGroup = document.createElementNS(xmlns, "g");
         this.symbolsGroup = document.createElementNS(xmlns, "g");
+        this.tabularGroup.setAttribute("style", "transform: translate(0, 3vh)");
         this.domElementP.appendChild(this.tabularGroup);
 
         // generate six lines:
+        const string_interval = 4;
         for(let i=0; i<6; i++) {
             let line = document.createElementNS(xmlns, "line");
             line.setAttribute("x1", "0vw");
-            line.setAttribute("y1", `${i*2}vh`);
+            line.setAttribute("y1", `${i*string_interval}vh`);
             line.setAttribute("x2", "100vw");
-            line.setAttribute("y2", `${i*2}vh`);
+            line.setAttribute("y2", `${i*string_interval}vh`);
             line.classList.add("string");
             this.tabularGroup.appendChild(line);
         }
 
+        // vertical hit box
+        this.hitbox = document.createElementNS(xmlns, "rect");
+        this.hitbox.setAttribute("style", `transform: translate(${10-this.interval*1/(this.validDuration)}vw, 0vh)`);
+        this.hitbox.setAttribute("width", `${this.interval*1/(this.validDuration/2)}vw`);
+        this.hitbox.setAttribute("height", `${string_interval*5}vh`);
+        this.hitbox.classList.add("hitbox");
+        this.tabularGroup.appendChild(this.hitbox);
+
+        let line = document.createElementNS(xmlns, "line");
+        line.setAttribute("x1", "10vw");
+        line.setAttribute("y1", "0vh");
+        line.setAttribute("x2", "10vw");
+        line.setAttribute("y2", `${string_interval*5}vh`);
+        line.classList.add("scanline");
+        this.tabularGroup.appendChild(line);
+
         this.tabularGroup.setAttribute("style", `transform: translate(0px, 10px) scale(1);`);
 
-        let dx = 0;
+        let dx = 10;
+
         // draw note
         for(let i=0; i<this.tabular.sections.length; i++) {
             const section = this.tabular.sections[i];
@@ -409,24 +438,45 @@ export class SVGRenderer {
                 const note = section.notes[j];
 
                 if(note instanceof Note) {
-                    const validArea = document.createElementNS(xmlns, "rect");
-                    validArea.classList.add("valid-area");
-                    validArea.setAttribute("style", `transform: translate(${dx-this.interval*1/this.validDuration}vw, 0vh)`);
-                    validArea.setAttribute("width", `${this.interval*1/(this.validDuration/2)}vw`);
-                    validArea.setAttribute("height", `10vh`);
-                    this.symbolsGroup.appendChild(validArea);
+                    /*if(note.positions.length>1) {
+                        const validArea = document.createElementNS(xmlns, "rect");
+                        validArea.classList.add("valid-area");
+                        validArea.setAttribute("style", `transform: translate(${dx-this.interval*1/this.validDuration}vw, 0vh)`);
+                        validArea.setAttribute("width", `${this.interval*1/(this.validDuration/2)}vw`);
+                        validArea.setAttribute("height", `${string_interval*5}vh`);
+                        this.symbolsGroup.appendChild(validArea);
+                    }*/
+                    const link = note.positions.length>1;
+                    const result = note.positions.reduce((result, obj) => {
+                        if (obj.stringID < result[0]) result[0] = obj.stringID;
+                        if (obj.stringID > result[1]) result[1] = obj.stringID;
+                        return result;
+                    }, [Number.MAX_VALUE, Number.MIN_VALUE]);
+                    
+                    if(link) {
+                        console.log(result);
+                        let line = document.createElementNS(xmlns, "line");
+                        line.setAttribute("x1", `${dx}vw`);
+                        line.setAttribute("y1", `${(result[0]-1)*string_interval}vh`);
+                        line.setAttribute("x2", `${dx}vw`);
+                        line.setAttribute("y2", `${(result[1]-1)*string_interval}vh`);
+                        line.classList.add("link");
+                        this.symbolsGroup.appendChild(line);
+                    }
                     for(let k=0; k<note.positions.length; k++) {
                     
                         const position = note.positions[k];
                         const noteg = document.createElementNS(xmlns, "g");
                         
                         
-                        noteg.setAttribute("style", `transform: translate(${dx}vw, ${(position.stringID-1)*2}vh)`);
+                        noteg.setAttribute("style", `transform: translate(${dx}vw, ${(position.stringID-1)*string_interval}vh)`);
                         const circle = document.createElementNS(xmlns, "circle");
-                        circle.setAttribute("r", `5`);
+                        circle.setAttribute("r", `${string_interval/2.5}vh`);
                         circle.classList.add("note-bg-circle");
-
+                        if(link)
+                            circle.classList.add("note-link-border");
                         noteg.appendChild(circle);
+                        
 
                         const text = document.createElementNS(xmlns, "text");
                         text.innerHTML = `${position.fretID}`;
@@ -458,6 +508,17 @@ export class SVGRenderer {
         const beats = seconds * this.bpm / 60;
         // console.log(Math.floor(beats));
         this.symbolsGroup.setAttribute("style", `transform: translate(${-beats/4*this.interval}vw, 0);`);
+    }
+
+    public fireHitEvent(): void {
+        this.hitbox.classList.add("fire-hit-animation")
+        const newone = this.hitbox.cloneNode(true) as SVGRectElement;
+        if(this.hitbox.parentNode != null) {
+            this.hitbox.parentNode.replaceChild(newone, this.hitbox);
+            this.hitbox = newone;
+        }
+        
+        
     }
 }
 
