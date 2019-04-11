@@ -4,7 +4,7 @@ import { UserDataSource } from '../common/UserDataSource';
 import { DriverDataSource } from '../common/DriverDataSource';
 import { STabV1Reader } from '../common/STabV1Reader';
 import { Note, Section, Rest } from "../common/Tabular";
-import { GameLogic, GameState, SVGRenderer } from "../common/GameLogic";
+import { GameLogic, GameState, SVGRenderer, GameLogic2 } from "../common/GameLogic";
 import {D3Renderer} from "../common/Renderer";
 
 import * as Vex from 'vexflow';
@@ -207,7 +207,8 @@ $(document).ready(() => {
     }, 300);
 */
     if(gm.nowState==GameState.playing) {
-      gm.Hit({stringID: string_id, fretID: 0}, total / 1000);
+      //gm.Hit({stringID: string_id, fretID: 0}, total / 1000);
+      gm.hit([{stringID: string_id, fretID: 0}], Date.now()/1000.0);
     }
     
     console.log(note);
@@ -226,7 +227,8 @@ $(document).ready(() => {
   if(red.domElement != null)
     content.appendChild(red.domElement);
   let cxt = <CanvasRenderingContext2D>canvas.getContext("2d");
-  let gm = new GameLogic(fb, cxt, tab, {fps: 60, bpm:60, range: 32});
+  //let gm = new GameLogic(fb, cxt, tab, {fps: 60, bpm:60, range: 32});
+  let gm = new GameLogic2(tab, {bpm: 60, validDuration: 0.2});
   // dds.startSendData(1000);
 
   /////// Event Listener ///////
@@ -246,14 +248,15 @@ $(document).ready(() => {
   let gReplay = document.getElementById("replay") as HTMLElement;
   gStart.addEventListener("click", () => {
     cancelAnimationFrame(updateRequestID);
-    gm.StartGame();
+    //gm.StartGame();
+    gm.start(Date.now()/1000.0);
     startTimer();
     update();
   });
 
   gReplay.addEventListener("click", () => {
     cancelAnimationFrame(updateRequestID);
-    gm.StartReplay();
+    //gm.StartReplay();
     startTimer();
     update();
   });
@@ -264,10 +267,17 @@ $(document).ready(() => {
     console.log(`Total time: ${total}`);
   });
   
-  gm.on("perfect", (n: Note) => {
+  /*gm.on("perfect", (n: Note) => {
     red.firePerfectEvent(n);
     red.killNote(n);
   });
+  */
+
+  gm.on("perfect", (string_id: number) => {
+  red.firePerfectEvent(string_id);
+  //red.killNote(n);
+  });
+
 
   function startTimer() {
     fpsInterval = 1000 / fps;
@@ -285,10 +295,12 @@ $(document).ready(() => {
     elapsed = now - then;
     if (elapsed > fpsInterval) {
       then = now - (elapsed % fpsInterval);
-      gm.Update();
-      red.score = gm.score;
+      //gm.Update();
       if(gm.nowState == GameState.playing)
         red.setTime(total / 1000.0);
+      gm.update(Date.now()/1000.0);
+      red.score = gm.score;
+      
     }
     
     total = now - startTime;

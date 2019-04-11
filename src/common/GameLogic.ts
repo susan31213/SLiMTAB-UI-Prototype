@@ -55,6 +55,151 @@ class FunctionArray {
     }
 }
 
+interface GameLogicConfig {
+    bpm: number;
+    // second
+    validDuration: number;
+}
+
+interface StringEvent {
+    // second
+    onsetTime: number;
+    fretID: number;
+    note: Note;
+}
+
+type Array6<T> = [T, T, T, T, T, T];
+type StringsEvent = Array6<Array<StringEvent>>;
+
+interface PlayContext {
+    startTime: number;
+    triggeredEvent: Array6<Array<boolean>>;
+    endTime: number;
+};
+
+export class GameLogic2 {
+    private config: GameLogicConfig;
+    private stateP: GameState;
+    private tab: Tabular;
+    private stringsEvent: StringsEvent;
+    private scoreP: number;
+    private playContext: PlayContext;
+
+    private callbackFuntions: FunctionArray;
+
+    constructor(tab: Tabular, config: GameLogicConfig) {
+        this.tab = tab;
+        this.config = config;
+        
+        this.scoreP = 0;
+        this.stateP = GameState.end;
+        this.stringsEvent = [[], [], [], [], [], []];
+        this.playContext = {
+            startTime: 0,
+            triggeredEvent: [[], [], [], [], [], []],
+            endTime: 0
+        };
+
+        let eventTypes = ["start", "end", "perfect", "good", "miss"];
+        this.callbackFuntions = new FunctionArray(eventTypes);
+    }
+
+    public on(ename: string, cbk: (arg: any) => void): void {
+        if(this.callbackFuntions[ename]!=undefined) {
+            this.callbackFuntions[ename].push(cbk);
+        }
+    }
+
+    public reset(startTime: number): void {
+        this.scoreP = 0;
+        this.stateP = GameState.end;
+        this.playContext = {
+            startTime: startTime,
+            triggeredEvent: [[], [], [], [], [], []],
+            endTime: startTime
+        };
+
+        let onset = 0;
+        this.stringsEvent = [[], [], [], [], [], []];
+        for(let i=0; i<this.tab.sections.length; i++) {
+            const section = this.tab.sections[i];
+            for(let j=0; j<section.notes.length; j++) {
+                const note = section.notes[j];
+                if(note instanceof Note) {
+                    for(let k=0; k<note.positions.length; k++) {
+                        const position = note.positions[k];
+                        this.stringsEvent[position.stringID-1].push(
+                            {onsetTime: onset, fretID: position.fretID, note: note}
+                        );
+                        
+                    }
+                }
+                // 4 = 1 beat
+                onset += 4 / note.duration * 60/this.config.bpm;
+            }
+        }
+        this.playContext.endTime += onset;
+
+        for(let i=0; i<6; i++) {
+            this.playContext.triggeredEvent[i] = Array(this.stringsEvent[i].length).fill(false);
+        }
+    }
+
+    public start(elapsedTime: number): void {
+        if(this.stateP == GameState.end) {
+            this.reset(elapsedTime);
+            
+            this.callbackFuntions["start"].forEach((func) => func());
+            this.stateP = GameState.playing;
+
+        }
+    }
+
+    public update(elapsedTime: number): void {
+        // abstraction
+        if(elapsedTime >= this.playContext.endTime) {
+            this.callbackFuntions["end"].forEach((func) => func());
+            this.stateP = GameState.end;
+        }
+    }
+
+    public hit(positions: Array<{stringID: number, fretID: number}>, elapsedTime: number): void {
+        if(this.stateP != GameState.playing)
+            return;
+        
+        let i=0, j=0;
+        const validDuration = this.config.validDuration;
+        for(; i<positions.length; i++) {
+            const stringEvent = this.stringsEvent[positions[i].stringID-1];
+            for(; j<stringEvent.length; j++) {
+                const x = stringEvent[j];
+                if(Math.abs(x.onsetTime - (elapsedTime-this.playContext.startTime))<=validDuration) {
+                    if(this.playContext.triggeredEvent[positions[i].stringID-1][j]==false)
+                        if(x.fretID == positions[i].fretID) 
+                            break;
+                }
+            }
+
+            if(j<stringEvent.length) {
+                this.playContext.triggeredEvent[positions[i].stringID-1][j]=true;
+                // fire perfect event
+                this.callbackFuntions["perfect"].forEach((func) => func(positions[i].stringID));
+                this.scoreP += 10;
+            }
+
+        }
+        
+    }
+
+    get nowState(): GameState {
+        return this.stateP;
+    }
+
+    get score(): number {
+        return this.scoreP;
+    }
+}
+
 export class GameLogic {
     private fb: FingerBoard;
     private state: GameState;

@@ -97,8 +97,8 @@ export class D3Renderer {
         this.noteAction[string_id-1] = newone;
     }
 
-    public firePerfectEvent(note: Note): void {
-        
+    public firePerfectEvent(string_id: number): void {
+        /*
         for(let i=0; i<note.positions.length; i++) {
             const string_id = note.positions[i].stringID;
             const string = this.noteAction[string_id-1] as d3.Selection<d3.BaseType, undefined, null, undefined>;
@@ -108,7 +108,7 @@ export class D3Renderer {
             ((string.node() as HTMLElement).parentNode as HTMLElement).replaceChild(newone.node() as Node, string.node() as Node);
             newone.classed("fire-prefect-action", true);
             this.noteAction[string_id-1] = newone;
-        }
+        }*/
     }
 
     public fireGoodEvent(string_id: number, note?: string): void {
@@ -143,6 +143,8 @@ export class D3Renderer {
                         const noteg = this.symbolsGroup.append('svg:g');
 
                         noteg.attr("style", `transform: translate(${dx}vw, ${(position.stringID-1)*this.config.string_interval}vh)`);
+                        noteg.attr("data-x", `${dx}vw`);
+                        noteg.attr("data-y", `${(position.stringID-1)*this.config.string_interval}vh)`);
                         const circle = noteg.append('svg:image');
                         circle.attr("xlink:href", "./img/group-174.svg");
                         circle.attr('x', "-14").attr("y", "-14");
@@ -172,11 +174,17 @@ export class D3Renderer {
 
     public killNote(note: Note): void {
         console.log(note);
-        d3.select((note as any).renderContext).attr("opacity", "1").transition().duration(500).attr("opacity", "0");
+        const noteg = d3.select((note as any).renderContext);
+        noteg.attr("style", `transform: translate(${noteg.attr("data-x")}, ${noteg.attr("data-y")} scale(1.0)`).transition().duration(100)
+            .attr("style", `transform: translate(${noteg.attr("data-x")}, ${noteg.attr("data-y")} scale(0)`)
     }
 
     public reset(): void {
-        this.symbolsGroup.selectAll('g').attr("opacity", "1");
+        // TODO: This is TOO ugly
+        this.symbolsGroup.selectAll('g').nodes().forEach((x) => {
+            const noteg = d3.select(x);
+            noteg.attr("style", `transform: translate(${noteg.attr("data-x")}, ${noteg.attr("data-y")} scale(1.0)`);
+        })
         this.setTime(0);
     }
 };
