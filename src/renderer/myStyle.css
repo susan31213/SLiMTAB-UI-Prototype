@@ -9,7 +9,7 @@ body {
 
 .ui-container{
     display: grid;
-    grid-template-rows:  64px 1fr 160px;
+    grid-template-rows:  64px 1fr 20px;
     grid-template-areas: 
       "t"
       "m"
